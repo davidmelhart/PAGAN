@@ -1,0 +1,26 @@
+#main-content > .inner {
+  text-align: center;
+  min-height: 0;
+}
+.button {
+  display: block;
+  max-width: 300px;
+}
+.social {
+  margin: 30px auto;
+}
+.social > div {
+  width: 50%;
+}
+.social #twitter {
+  width: 50%;
+  min-width: 444px;
+  margin: auto;
+}
+.social #twitter iframe {
+  border-radius: 10px;
+}
+.follow-btn {
+  margin-bottom: -4px;
+  margin-top: 10px;
+}

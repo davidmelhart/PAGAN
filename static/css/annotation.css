@@ -1,0 +1,352 @@
+p.instructions,
+p.welcome {
+    font-size: 1.5em;
+}
+
+.annotation-container {
+  position: relative;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  background: #343434;
+  border-radius: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+  z-index: 99;
+}
+.annotation-container > video {
+  background: black;
+  width: 100%;
+  height: calc(100vh - 186px);
+  max-height: 500px;
+  transition: opacity 0.3s;
+}
+
+.annotation-container > #video-length{
+  width: 100%;
+  height: 3px;
+  background: #4d4d4d;
+  position: absolute;
+  bottom: 183px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
+}
+
+.annotation-container > #video-length #bar {
+  position: absolute;
+  left: 0;
+  height: 3px;
+  min-width: 0;
+  background: #86a3c6;
+  transition: width 0.1s;
+}
+
+.annotation-container > #controls {
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+.annotation-container > #tutorial {
+  background: #343434;
+  width: 100%;
+  height: calc(100vh - 185px);
+  max-height: 501px;
+  position: absolute;
+  transition: all 0.3s;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+}
+.annotation-container > #tutorial div {
+  padding-top: 45px;
+}
+
+.annotation-container > #tutorial p {
+  color: #e6e4e3;
+  margin: 30px 0;
+  text-align: center;
+}
+
+.annotation-container > #tutorial p.counter {
+  position: absolute;
+  top: 0px;
+  right: 30px;
+  font-size: 0.75em;
+}
+
+.annotation-container > #tutorial img {
+  position: absolute;
+  bottom: -169px;
+  left: 60px;
+  width: calc(100% - 120px);
+  height: 150px;
+}
+
+.annotation-container > .messages div{
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  position: absolute;
+  left: 50%;
+  top: calc(50% - 70px);
+  transform: translateX(-50%) translateY(-50%);
+  color: #e6e4e3;
+  background: #343434;
+  border-radius: 20px;
+  padding: 10px 30px;
+  text-align: center;
+  transition: opacity 0.3s;
+  z-index: 10;
+}
+
+.annotation-container > #video-shade{
+  background: black;
+  width: 100%;
+  height: calc(100vh - 186px);
+  max-height: 500px;
+  position: absolute;
+  opacity: 0.6;
+  z-index: 1;
+}
+
+.annotation-container > .messages div.hidden,
+.annotation-container > #video-shade.hidden{
+  opacity: 0;
+}
+
+
+.annotation-container > #controls > canvas {
+  background: #4d4d4d;
+  border-radius: 10px;
+  width: calc(100% - 125px);
+  margin: 20px 0 16px 0;
+  height: 150px;
+}
+.annotation-container > #controls > #label {
+  color: #e6e4e3;
+  width: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.annotation-container > #controls > #label.gtrace {
+    position: absolute;
+    display: block;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #343434;
+    width: auto;
+    padding: 10px 25px;
+    z-index: 999;
+    top: 3px;
+    border-radius: 10px;
+}
+.annotation-container > #controls > #label > span {
+  transform: rotate(-90deg);
+  text-align: center;
+}
+
+.keys{
+  width: 65px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 30px 0;
+  text-align: center;
+  color: #e6e4e3;
+  font-size: 0.5em;
+}
+.keys.gtrace {
+  justify-content: center;
+}
+.keys > hr {
+  margin: 0;
+  border: none;
+  background: #4d4d4d;
+  height: 2px;
+}
+
+.key {
+  width: 30px;
+  height: 32px;
+  display: inline-block;
+  background: url("../img/keys_spritesheet.png") no-repeat;
+  background-size: 202px 63px; /*173px 63px;*/
+  vertical-align: -9px;
+  margin: 0 5px;
+}
+
+.keys > .key {
+  margin: 0 auto;
+  transition: transform 0.1s;
+}
+
+.keys > .key.pressed {
+  transform: scale(0.9);
+}
+
+.key.w {
+  background-position: -29px 1px;
+}
+.key.up {
+  background-position: 1px 1px;
+}
+.key.s {
+  background-position: -29px -32px;
+}
+.key.down {
+  background-position: 1px -32px;
+}
+.key.left {
+  background-position: -144px -32px;
+}
+.key.right {
+  background-position: -144px 1px
+}
+.key.space {
+  width: 84px;
+  background-position: -59px 1px;
+}
+
+.key.scroll-up{
+  background-position: -173px 1px;
+}
+
+.key.scroll-down{
+  background-position: -173px -32px;
+}
+
+.key.scroll-full{
+  background-position: -173px 1px;
+  height: 65px;
+}
+
+#tooltip > .container > .inner {
+  text-align: center;
+}
+
+#tutorial button {
+  color: #e6e4e3;
+  background: none;
+  border: 4px solid #e6e4e3;
+  font-weight: bold;
+  padding: 5px 20px;
+  border-radius: 30px;
+  transition: color 0.3s, background 0.3s;
+  margin: 0 auto;
+  display: block;
+}
+
+#tutorial button:hover {
+  cursor: pointer;
+  color: #343434;
+  background: #e6e4e3;
+}
+
+.key.wait {
+    display: block;
+    margin: -5px auto 10px;
+    width: 30px;
+    height: 30px;
+    background-position: -59.5px -32px;
+    -webkit-animation-name: spin;
+    -webkit-animation-duration: 1000ms;
+    -webkit-animation-iteration-count: infinite;
+    -webkit-animation-timing-function: linear;
+    -moz-animation-name: spin;
+    -moz-animation-duration: 1000ms;
+    -moz-animation-iteration-count: infinite;
+    -moz-animation-timing-function: linear;
+    -ms-animation-name: spin;
+    -ms-animation-duration: 1000ms;
+    -ms-animation-iteration-count: infinite;
+    -ms-animation-timing-function: linear;
+
+    animation-name: spin;
+    animation-duration: 1000ms;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    transition: opacity 0.3s;
+}
+.key.wait.hidden {
+  opacity: 0;
+}
+
+@-ms-keyframes spin {
+    from { -ms-transform: rotate(0deg); }
+    to { -ms-transform: rotate(360deg); }
+}
+@-moz-keyframes spin {
+    from { -moz-transform: rotate(0deg); }
+    to { -moz-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    from { -webkit-transform: rotate(0deg); }
+    to { -webkit-transform: rotate(360deg); }
+}
+@keyframes spin {
+    from {
+        transform:rotate(0deg);
+    }
+    to {
+        transform:rotate(360deg);
+    }
+}
+
+iframe {
+  position: absolute;
+  height: calc(100vh - 186px);
+  max-height: 500px;
+}
+
+#test-tag {
+  position: absolute;
+  font-size: 2em;
+  z-index: 9999;
+  color: #e6e4e3;
+  right: 20px;
+  opacity: 0.5;
+  top: 10px;
+  text-transform: uppercase;
+  text-shadow: -1px -1px 0 #343434, 1px -1px 0 #343434, -1px 1px 0 #343434, 1px 1px 0 #343434;
+}
+
+.gtrace-label {
+  position: absolute;
+  color: #e6e4e3;
+  bottom: 10px;
+  padding: 5px 25px;
+  background: #343434;
+  border-radius: 10px;
+  z-index: 999;
+}
+
+.gtrace-label.neutral {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.gtrace-label.negative {
+  left: 45px;
+}
+
+.gtrace-label.positive {
+  right: 45px;
+}
+
+.subheader-buttons{
+  text-align: right;
+  position: fixed;
+  z-index: 999999;
+  right: 0;
+}
+
+.subheader-buttons a {
+  background: #b7b6b6;
+}
+
+.subheader-buttons a:hover,
+.subheader-buttons a:active {
+  background: #343434;
+}

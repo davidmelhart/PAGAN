@@ -1,0 +1,207 @@
+.page-header {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-header p {
+  margin: 0;
+}
+
+.projects-buttons{
+  text-align: right;
+}
+
+.projects-buttons a:last-child{
+  margin-left: 10px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.project-container {
+  background: #343434;
+  color: #e6e4e3;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 20px;
+  margin-bottom: 30px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  position: relative;
+}
+
+.project-container h2 {
+  font-size: 1.5em;
+  margin: 0;
+  font-weight: normal;
+}
+
+.project-container h3 {
+  font-size: 1em;
+  font-weight: normal;
+  margin-top: -5px;
+  margin-bottom: 10px;
+}
+
+.delete-project {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border: 2px solid #e6e4e3;
+  font-size: 0.8em;
+  border-bottom-left-radius: 7px;
+  border-top: 0;
+  border-right: 0;
+  display: flex;
+  text-align: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+.delete-project:hover {
+  color: #343434;
+  background: #e6e4e3;
+  cursor: pointer;
+}
+
+.delete-project span {
+  width: 20px;
+  height: 20px;
+  text-align: center !important;
+}
+
+.title-box {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.title-box div span {
+  /*display: block;*/
+  text-align: right;
+}
+
+.title-box div:last-of-type {
+  text-align: right;
+}
+
+.bottom-box {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  margin-top: 3px;
+}
+
+.share {
+  font-size: 0.8em;
+}
+
+.button.video,
+.button.download,
+.button.archive {
+  background: transparent;
+  padding: 5px 20px;
+  color: #e6e4e3;
+  border: solid 2px #e6e4e3;
+  border-radius: 10px;
+  font-weight: normal;
+  transition: background 0.3s, color 0.3s;
+  font-size: 0.6em;
+}
+
+.button.archive {
+  margin-left: 5px;
+}
+
+.button.download {
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
+.button.video:hover,
+.button.download:hover,
+.button.archive:hover,
+.button.video:active,
+.button.download:active,
+.button.archive:active,
+.button.video:focus,
+.button.download:focus,
+.button.archive:focus {
+  background: #e6e4e3;
+  color: #343434;
+  cursor: pointer;
+}
+
+.link-box {
+  background: #4d4d4d;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.link {
+  flex-grow: 1;
+  text-align: center;
+  color: #e6e4e3;
+  background: none;
+  border: none;
+  font-size: 0.6em;
+}
+
+.link:hover{
+  cursor: pointer;
+}
+
+.project-info {
+  display: inline !important;
+  position: relative;
+}
+
+.project-info:after {
+  content: "?";
+  font-size: 0.6em;
+  vertical-align: super;
+}
+
+.project-info-box{
+  opacity: 0;
+  visibility: hidden;
+  text-align: left !important;
+  font-size: 0.8em;
+  position: absolute;
+  background: #343434;
+  z-index: 9999;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  border-radius: 10px;
+  border: 2px solid #e6e4e3;
+  min-width: 220px;
+  top: 0;
+  left: 65px;
+  transition: opacity 0.3s, visibility 0.3s;
+}
+
+.project-info-box#google-forms {
+  bottom: 0;
+  top: auto;
+  left: 150px
+}
+
+.project-info-box#google-forms a{
+  color: #6388b6;
+  font-weight: bold;
+}
+
+.project-info-box p{
+  margin: 0;
+}
+
+.project-info:hover{
+  cursor: pointer;
+}
+
+.project-info:hover .project-info-box {
+  visibility: visible;
+  opacity: 1;
+}

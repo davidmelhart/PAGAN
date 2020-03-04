@@ -1,0 +1,17 @@
+#intro {
+  text-align: center;
+}
+
+h2, h3 {
+	margin: 0;
+}
+
+p.instructions,
+p.welcome {
+    font-size: 1.5em;
+    margin-bottom: -20px;
+}
+
+form {
+	margin-top: 40px;
+}

@@ -1,0 +1,136 @@
+.mylogs {
+  color: #343434;
+  font-weight: bold;
+  border: 4px solid #343434;
+  font-size: 0.6em;
+  line-height: 1.9em;
+  padding: 0 10px;
+  height: 30px;
+  text-align: center;
+  border-radius: 30px;
+  position: absolute;
+  right: 35px;
+  top: 13px;
+  box-sizing: border-box;
+  transition: color 0.3s, background 0.3s;
+  z-index: 10;
+}
+.mylogs:hover, .mylogs:focus, .mylogs:active {
+  background: #343434;
+  color: #b2b1b1;
+  cursor: pointer;
+}
+#logs {
+  display: none;
+  width: 100vw;
+  background: #e6e4e3;
+  background: -moz-radial-gradient(center, ellipse cover, #e6e4e3 0%, #b2b1b1 100%);
+  background: -webkit-radial-gradient(center, ellipse cover, #e6e4e3 0%, #b2b1b1 100%);
+  background: radial-gradient(ellipse at center, #e6e4e3 0%, #b2b1b1 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#e6e4e3', endColorstr='#b2b1b1',GradientType=1);
+  min-height: 100vh;
+  position: absolute;
+  opacity: 0;
+  top: 0;
+  transition: opacity 0.5s;
+  z-index: 999;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+#logs.open {
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+#logs > .container {
+  max-width: 890px;
+  display: flex;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+#logs > .container > .inner {
+  min-height: 0;
+  text-align: justify;
+}
+#logs > .container > .inner>div{
+    width: 100%;
+}
+#logs > .container {
+  display: block;
+}
+.logs-title {
+  text-align: center;
+  margin: 0;
+  padding-top: 10px;
+}
+.log-item {
+  background: #343434;
+  border-radius: 12px;
+  box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.5);
+  margin-top: 30px;
+  width: 100%;
+  color: #e6e4e3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 40px;
+  min-height: 100px;
+  transition: all 0.5s;
+}
+.log-item:last-of-type {
+  margin-bottom: 30px;
+}
+.log-item > div {
+  display: inline-block;
+}
+.log-item > div > a button {
+  color: #e6e4e3;
+  background: none;
+  border: 4px solid #e6e4e3;
+  font-weight: bold;
+  padding: 5px 20px;
+  border-radius: 30px;
+  transition: color 0.3s, background 0.3s;
+}
+.log-item > div > a button:hover {
+  cursor: pointer;
+  color: #343434;
+  background: #e6e4e3;
+}
+.log-item > div.download-link {
+  margin-left: 40px;
+}
+.log-item > div.download-link a {
+  margin: 10px 0;
+}
+.log-item > div.download-link .remove-log {
+  margin-left: 10px;
+}
+.log-item > div.download-link .remove-log:hover {
+  background: #a2423f;
+  color: #f5a19e;
+}
+.log-item > div.log-description h3 {
+  margin: 0;
+}
+.log-item > div.log-description h4 {
+  font-weight: 100;
+  text-transform: lowercase;
+  margin: 0;
+}
+.log-item > div.log-description h5 {
+  margin: 0;
+  margin-top: 5px;
+}
+.log-item > div.log-description:hover {
+  cursor: default;
+}
+.log-item.deleted {
+  background: #a2423f;
+  color: #f5a19e;
+  opacity: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+}
