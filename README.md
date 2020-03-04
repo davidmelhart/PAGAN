@@ -8,6 +8,8 @@ Please be aware that if you record and store the likeness of participants, you h
 
 Passwords are hashed and handled securely, and communication with the server uses PDO prepared statemets.
 
+To use the platform, set up your database following the instructions below and create a registration key on the server-side. At this moment this has to be done my hand through the database. After this, you can use the registration key to registre a new user and use the platfrom.
+
 The quality of the code can be improved both on the app and the server side, treat it as "research code", it functions but would require a whole deal of refactoring, which is unfortunately out of the scope of my current work.
 
 ## Database Setup
