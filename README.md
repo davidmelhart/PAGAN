@@ -14,12 +14,12 @@ The quality of the code can be improved both on the app and the server side, tre
 Use the `config.php` file to set up the credentials to your connection.
 
 Your database needs the following tables set up:
-**`reg_keys`**: `id, secret, created_at`
-**`users`**: `id, username, email, affiliation, password, created_at`
-**`password_resets`**: `id, email, token, created_at`
-**`projects`**: `id, user_name, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, end_message, survey_link, sound, start_message, archived, upload_message, autofill_id, created_at`
-**`project_entries`**: `id, project_id, entry_id, source_type, source_url, original_name, type, created_at`
-**`logs`**: `id, project_id, participant_id, session_id, time_stamp, videotime, annotation_value, original_name, annotation_type, entry_id`
+* **`reg_keys`**: `id, secret, created_at`
+* **`users`**: `id, username, email, affiliation, password, created_at`
+* **`password_resets`**: `id, email, token, created_at`
+* **`projects`**: `id, user_name, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, end_message, survey_link, sound, start_message, archived, upload_message, autofill_id, created_at`
+* **`project_entries`**: `id, project_id, entry_id, source_type, source_url, original_name, type, created_at`
+* **`logs`**: `id, project_id, participant_id, session_id, time_stamp, videotime, annotation_value, original_name, annotation_type, entry_id`
 
 If you are not experienced with mySQL or just want to set up the application qickly, here are the mySQL commands with which you can set up everything in one go:
 
