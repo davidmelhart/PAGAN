@@ -61,7 +61,7 @@ p.welcome {
   z-index: 99;
 }
 .annotation-container > #tutorial div {
-  padding-top: 45px;
+  padding: 45px 45px 0;
 }
 
 .annotation-container > #tutorial p {
@@ -145,6 +145,7 @@ p.welcome {
 .annotation-container > #controls > #label > span {
   transform: rotate(-90deg);
   text-align: center;
+  white-space: nowrap;
 }
 
 .keys{

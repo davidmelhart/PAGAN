@@ -1,13 +1,31 @@
 <?php
-$title = 'Platform for Affective Game ANnotation';
-$css = ['upload.css', 'forms.css'];
-include("header.php");
-
+require_once "config.php";
 // Initialize the session
 session_start();
- 
-// Include config file
-require_once "config.php";
+// Generate User if User does not exists
+if(!isset($_COOKIE['user'])){
+$id = getGUID();
+  setcookie('user', $id, time()+315400000,"/");
+  $_COOKIE['user'] = $id;
+}
+
+$current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+
+// Generates GUID for username
+function getGUID(){
+  mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+  $charid = strtoupper(md5(uniqid(rand(), true)));
+  $hyphen = chr(45);
+  $uuid = substr($charid, 0, 8).$hyphen
+        .substr($charid, 8, 4).$hyphen
+        .substr($charid,12, 4).$hyphen
+          .substr($charid,16, 4).$hyphen
+        .substr($charid,20,12);
+  return $uuid;
+}
+
+$title = 'Platform for Affective Game ANnotation';
+$css = ['upload.css', 'forms.css'];
 
 // Define variables and initialize with empty values
 $project_id = $source_url = $original_name = $project_name = $target = $source_type = $message = $n_of_participant_runs = $endless = "";
@@ -123,11 +141,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $source_url_err = "File is not a video.";
         }
         // Check extention
-        if($fileType != "mp4" && $fileType != "mpeg" && $fileType != "avi") {
-            $source_url_err = "Sorry, only MP4, MPEG & AVI files are allowed.";
+        if($fileType != "mp4" && $fileType != "mpeg" && $fileType != "avi" && $fileType != "mov") {
+            $source_url_err = "Sorry, only MP4, MPEG, AVI & MOV files are allowed.";
         }
         // Check file size
-        if ($_FILES["file"]["size"] > 500*MB) {
+        if ($_FILES["file"]["size"] > 1500*MB) {
             $source_url_err = "Sorry, the file is too large.";
         }       
     }
@@ -242,7 +260,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 ?>
 
-<?php if(!isset($_COOKIE['seen_notice'])) {
+<?php 
+    include("header.php");
+    if(!isset($_COOKIE['seen_notice'])) {
     echo "<div id='cookie_notice'>
             <h3>Hello!</h3>
             <p>Thank you for your help in this experiment!</p>
@@ -301,7 +321,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     <input type="hidden" name="project-id" value="<?php echo $project_id;?>">
                     <?php
                     if ($source_type == "user_upload") {
-                        echo '<input type="file" name="file" class="form-control" id="file-source" accept="video/mp4" value="">';
+                        echo '<input type="file" name="file" class="form-control" id="file-source" value="">';
                     } else if ($source_type == "user_youtube") {
                         echo '<input type="text" name="source_url" class="form-control youtube-source" value="">';
                     }

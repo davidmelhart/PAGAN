@@ -364,3 +364,19 @@ nav ul a.current {
 .citations li {
   padding-bottom: 20px;
 }
+
+.participant_id{
+  position: fixed;
+  top: 5px;
+  left: 5px;
+  font-size: 0.7em;
+  font-family: 'Arial';
+}
+
+.participant_id span{
+  font-size: initial;
+  line-height: 0;
+  position: absolute;
+  top: 4.6px;
+  padding-left: 5px;
+}

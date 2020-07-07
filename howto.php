@@ -1,12 +1,32 @@
-﻿<?php
+<?php
+  require_once "config.php";
+  // Initialize the session
+  session_start();
+  // Generate User if User does not exists
+  if(!isset($_COOKIE['user'])){
+    $id = getGUID();
+      setcookie('user', $id, time()+315400000,"/");
+      $_COOKIE['user'] = $id;
+  }
+
+  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+
+  // Generates GUID for username
+  function getGUID(){
+      mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+      $charid = strtoupper(md5(uniqid(rand(), true)));
+      $hyphen = chr(45);
+      $uuid = substr($charid, 0, 8).$hyphen
+            .substr($charid, 8, 4).$hyphen
+            .substr($charid,12, 4).$hyphen
+              .substr($charid,16, 4).$hyphen
+            .substr($charid,20,12);
+      return $uuid;
+  }
+
 $title = 'Platform for Affective Game ANnotation';
 include("header.php");
 
-// Initialize the session
-session_start();
- 
-// Include config file
-require_once "config.php";
 ?>
     <div id="subheader">
         <h2>[Platform for Audiovisual General-purpose ANotation]</h2>
@@ -25,10 +45,6 @@ require_once "config.php";
     <div class="page-header">
     </div>
     <div class="main-text">
-	<p>If you use PAGAN in your scientific work, please it cite as:<br>
-	<span style="font-weight: 600">
-	Melhart D., Liapis A. & Yannakakis G. N. (2019). PAGAN: Video Affect Annotation Made Easy. In <i>Proceedings of the 8th International Conference on Affective Computing and Intelligent Interaction (ACII)</i>, Cambridge, United Kingdom.
-	</span></p>
         <h2>Overview</h2>
         <p>PAGAN can run in any browser and only requries a desktop computer with a conventinal keyboard for the annotator application to work. The framework consists of an administrative dashboard for researchers (accessible under <a href="./projects.php">My Projects</a>) and a separate participant interface to minimise distraction during the annotation process.</p>
 

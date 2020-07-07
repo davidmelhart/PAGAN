@@ -260,7 +260,8 @@ function startControls() {
             37: function() { subtractValue(); },
             65: function() { subtractValue(); },
         }, keySpeed);
-    } else {
+    }
+    if (annotation_type == "binary") {
         KeyboardController({
             // Key Up and W, Right and D
             38: function() { addValue(); },
@@ -324,8 +325,8 @@ function animateRankTrace(){
     }
     // Output for the video length bar
     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');    
-    // If video passed 25% of viewing time, register it as seen
-    if(getCurrentTime()/getDuration() > 0.25 && seen_trigger == false) {
+    // If video passed 99% of viewing time, register it as seen
+    if(getCurrentTime()/getDuration() > 0.99 && seen_trigger == false) {
         seen_trigger = true;
         var seen;
         if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
@@ -650,7 +651,7 @@ function animateBinary(){
             context.fillStyle = '#f0736e';
         }
         context.beginPath();
-        context.arc(((trace[j].x / currentTime) * (canvas.width - 40)) + 20, canvas.height/2,//trace[j].y,
+        context.arc(((trace[j].x / currentTime) * (canvas.width - 40)) + 20, trace[j].y,//canvas.height/2,
                     10, 0, 2 * Math.PI, false);
         context.fill();
         context.stroke();
@@ -773,6 +774,7 @@ function KeyboardController(keys, repeat) {
 }
 
 function startPause() {
+    console.log("Space Pressed");
     var youtubePaused = false;
     if (!end_trigger) {
         if (video_type == 'youtube' || video_type == 'user_youtube') {

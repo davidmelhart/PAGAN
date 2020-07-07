@@ -1,13 +1,32 @@
 <?php
-$title = 'Platform for Affective Game ANnotation';
-$css = ['forms.css'];
-include("header.php");
-
+require_once "config.php";
 // Initialize the session
 session_start();
+// Generate User if User does not exists
+if(!isset($_COOKIE['user'])){
+$id = getGUID();
+  setcookie('user', $id, time()+315400000,"/");
+  $_COOKIE['user'] = $id;
+}
 
-// Include config file
-require_once "config.php";
+$current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+
+// Generates GUID for username
+function getGUID(){
+  mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+  $charid = strtoupper(md5(uniqid(rand(), true)));
+  $hyphen = chr(45);
+  $uuid = substr($charid, 0, 8).$hyphen
+        .substr($charid, 8, 4).$hyphen
+        .substr($charid,12, 4).$hyphen
+          .substr($charid,16, 4).$hyphen
+        .substr($charid,20,12);
+  return $uuid;
+}
+
+$title = 'Platform for Affective Game ANnotation';
+$css = ['forms.css'];
+
 $message = $survey = $autofill_id = "";
 $project_id = htmlspecialchars($_GET['id'], ENT_QUOTES, "UTF-8");
 $participant_id = $_COOKIE['user'];
@@ -26,7 +45,9 @@ if($_SERVER["REQUEST_METHOD"] == "GET"){
 	// Close connection
 	unset($pdo);
 }
+include("header.php");
 
+echo '<div class="participant_id">ID: '.$_COOKIE['user'].'</div>';
 ?>
     <div id="end-messages">
         <div>

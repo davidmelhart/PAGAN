@@ -1,20 +1,38 @@
 <?php
-$title = 'Platform for Affective Game ANnotation';
-$css = ['researcher.css', 'forms.css'];
-include("header.php");
-
+require_once "config.php";
 // Initialize the session
 session_start();
- 
+// Generate User if User does not exists
+if(!isset($_COOKIE['user'])){
+$id = getGUID();
+  setcookie('user', $id, time()+315400000,"/");
+  $_COOKIE['user'] = $id;
+}
+
+$current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+
+// Generates GUID for username
+function getGUID(){
+  mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+  $charid = strtoupper(md5(uniqid(rand(), true)));
+  $hyphen = chr(45);
+  $uuid = substr($charid, 0, 8).$hyphen
+        .substr($charid, 8, 4).$hyphen
+        .substr($charid,12, 4).$hyphen
+          .substr($charid,16, 4).$hyphen
+        .substr($charid,20,12);
+  return $uuid;
+}
+
+$title = 'Platform for Affective Game ANnotation';
+$css = ['researcher.css', 'forms.css'];
+
 // Check if the user is already logged in, if yes then redirect him to welcome page
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
     header("location: projects.php");
     exit;
 }
- 
-// Include config file
-require_once "config.php";
- 
+
 // Define variables and initialize with empty values
 $username = $password = "";
 $username_err = $password_err = "";
@@ -88,6 +106,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Close connection
     unset($pdo);
 }
+include("header.php");
 ?>
     <div id="subheader">
         <h2>[Platform for Audiovisual General-purpose ANotation]</h2>

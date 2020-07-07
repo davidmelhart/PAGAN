@@ -1,12 +1,31 @@
-﻿<?php
+<?php
+  require_once "config.php";
+  // Initialize the session
+  session_start();
+  // Generate User if User does not exists
+  if(!isset($_COOKIE['user'])){
+    $id = getGUID();
+      setcookie('user', $id, time()+315400000,"/");
+      $_COOKIE['user'] = $id;
+  }
+
+  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+
+  // Generates GUID for username
+  function getGUID(){
+      mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+      $charid = strtoupper(md5(uniqid(rand(), true)));
+      $hyphen = chr(45);
+      $uuid = substr($charid, 0, 8).$hyphen
+            .substr($charid, 8, 4).$hyphen
+            .substr($charid,12, 4).$hyphen
+              .substr($charid,16, 4).$hyphen
+            .substr($charid,20,12);
+      return $uuid;
+  }
+
 $title = 'Platform for Affective Game ANnotation';
 include("header.php");
-
-// Initialize the session
-session_start();
-
-// Include config file
-require_once "config.php";
 ?>
     <div id="subheader">
         <h2>[Platform for Audiovisual General-purpose ANotation]</h2>
@@ -37,18 +56,15 @@ require_once "config.php";
 			<img src="./static/img/uom-logo.png" style="width: 200px" />
 		</div>
 		<p>The tool is free for scientific use. An open test application can be found on the <a href="./howto.php">How To & Test</a> page.</p>
-
-		<p>If you use PAGAN in your scientific work, please cite it as:<br>
-		<span style="font-weight: 600">
-		Melhart D., Liapis A. & Yannakakis G. N. (2019). PAGAN: Video Affect Annotation Made Easy. In <i>Proceedings of the 8th International Conference on Affective Computing and Intelligent Interaction (ACII)</i>, Cambridge, United Kingdom.
-		</span></p>
-
 		<p>Students and researchers interested in using the framework should send an email to 
 			<a href="mailto:david.melhart@um.edu.mt?subject=Requesting PAGAN access" target="_blank">david.melhart [at] um.edu.mt</a> 
 		with a pargraph describing their project to gain access to the full project creation and management functionalities.</p>
 
+		<!--<p>If you use PAGAN in your scientific work, please cite as:
+		</p>-->
+
 		<!--<p>PAGAN is under the Affero GPL General Public License. A copy of this license may be downloaded from the <a href="./terms.php">Terms</a> section. The sourcecode of the application is available on GitHub.</p>-->
-        <ol class="citations" style="font-size:0.7em">
+        <ol class="citations">
             <li>G.  McKeown,  M.  Valstar,  R.  Cowie,  M.  Pantic,  and  M.  Schroder,  “The semaine database: Annotated multimodal records of emotionally colored conversations between a person and a limited agent,” <i>IEEE Transactionson Affective Computing</i>, vol. 3, no. 1, pp. 5–17, 2012.</li>
         </ol>
     </div>

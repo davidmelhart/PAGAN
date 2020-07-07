@@ -1,13 +1,36 @@
 <?php
+    require_once "config.php";
+    // Initialize the session
+    session_start();
+    // Generate User if User does not exists
+    if(!isset($_COOKIE['user'])){
+    $id = getGUID();
+        setcookie('user', $id, time()+315400000,"/");
+        $_COOKIE['user'] = $id;
+    }
+
+    $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+
+    // Generates GUID for username
+    function getGUID(){
+        mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+        $charid = strtoupper(md5(uniqid(rand(), true)));
+        $hyphen = chr(45);
+        $uuid = substr($charid, 0, 8).$hyphen
+                .substr($charid, 8, 4).$hyphen
+                .substr($charid,12, 4).$hyphen
+                .substr($charid,16, 4).$hyphen
+                .substr($charid,20,12);
+        return $uuid;
+    }
+
     $title = 'Platform for Affective Game ANnotation';
     $css = ['annotation.css'];
     $test_mode = False;
     if (!empty($_GET['test_mode'])){
         $test_mode = 1;
     }
-    include("header.php");
 
-    require_once "config.php";
     $project_name = $target = $type = $session_id = "";
     $available_entries = array();
     if (isset($_COOKIE['session_id'])) {
@@ -148,9 +171,16 @@
             unset($pdo);
         }
     }
-?>
 
-<?php 
+    if(!isset($_COOKIE['seen_notice'])) {
+        setcookie('seen_notice', 'seen', time()+315400000, '/', $_SERVER['HTTP_HOST']);
+    }
+
+    include("header.php");
+
+    if ($test_mode > 0) {
+        echo "<div class='subheader-buttons'><a class='button' href='./test.php'>go back</a></div>";
+    }
     if(!isset($_COOKIE['seen_notice'])) {
         echo "<div id='cookie_notice'>
             <h3>Hello!</h3>
@@ -163,11 +193,9 @@
             <button>Alright, I understand</button>
         </div>
         <div id='cookie_wall'></div>";
-        setcookie('seen_notice', 'seen', strtotime('+365 days'), '/', $_SERVER['HTTP_HOST']);
-        } 
-    if ($test_mode > 0) {
-        echo "<div class='subheader-buttons'><a class='button' href='./test.php'>go back</a></div>";
     }
+
+    echo '<div class="participant_id">ID: '.$_COOKIE['user'].'</div>';
 ?>
 
 
@@ -191,7 +219,7 @@
                         echo '<p>The video contains audio.<br>Please turn on your speakers or headphones.</p>';
                     }
                     if ($type === 'gtrace') {
-                        echo '<p class="instructions">Please use the <span class="key right"></span>(increase) and <span class="key left"></span>(decrease) keys<br>to indicate the <strong>level of '.$target;
+                        echo '<p class="instructions">Please use the <span class="key right"></span>(increase) and <span class="key left"></span>(decrease) keys<br>to indicate the <strong>the level of '.$target;
                         if(!empty($message)){echo'*';}
                         echo '</strong> while watching the video.</p>';
                     } else if ($type ==='binary'){
@@ -199,7 +227,7 @@
                         if(!empty($message)){echo'*';}
                         echo '</strong><br>while watching the video.</p>';
                     } else {
-                        echo '<p class="instructions">Please use the scroll-wheel <span class="key scroll-full"></span>to indicate<br>the <strong>level of '.$target;
+                        echo '<p class="instructions">Please use the scroll-wheel <span class="key scroll-full"></span>to indicate<br>the <strong>changes in the level of '.$target;
                         if(!empty($message)){echo'*';}
                         echo '</strong> while watching the video.</p>';
                     }
@@ -225,6 +253,7 @@
             <div id="pause" class="hidden">
                 <p>The video is paused.</p>
                 <p>Press <span class="key space"></span> to continue.</p>
+                <p style="font-size: 0.7em">If stuck please refresh (Ctrl + R).</p>
             </div>
             <div id="ended" class="hidden">
                 <p>The video has ended.</p>
@@ -253,9 +282,9 @@
             <?php
             if ($type === 'gtrace') {
                 echo '<div id="label" class="gtrace"><span>'.$target.'</span></div>
-                <div class="gtrace-label positive"><span>high arousal</span></div>
+                <div class="gtrace-label positive"><span>high</span></div>
                 <div class="gtrace-label neutral"><span>neutral</span></div>
-                <div class="gtrace-label negative"><span>low arousal</span></div>
+                <div class="gtrace-label negative"><span>low</span></div>
                 <div class="keys gtrace"><span class="key left"></span><span>decrease</span></div>';
             } else {
                 echo '<div id="label"><span>'.$target.'</span></div>';

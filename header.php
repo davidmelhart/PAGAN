@@ -1,30 +1,32 @@
 <?php
-# Generate User if User does not exists
-if(!isset($_COOKIE['user'])){
-	$id = getGUID();
-    setcookie('user', $id, time()+315400000,"/");
-    $_COOKIE['user'] = $id;
-}
+// // Initialize the session
+// session_start();
+// # Generate User if User does not exists
+// if(!isset($_COOKIE['user'])){
+// 	$id = getGUID();
+//     setcookie('user', $id, time()+315400000,"/");
+//     $_COOKIE['user'] = $id;
+// }
 
-$current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
+// $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
 
-# Generates GUID for username
-function getGUID(){
-    mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
-    $charid = strtoupper(md5(uniqid(rand(), true)));
-    $hyphen = chr(45);
-    $uuid = substr($charid, 0, 8).$hyphen
-        	.substr($charid, 8, 4).$hyphen
-        	.substr($charid,12, 4).$hyphen
-            .substr($charid,16, 4).$hyphen
-        	.substr($charid,20,12);
-    return $uuid;
-}
+// # Generates GUID for username
+// function getGUID(){
+//     mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
+//     $charid = strtoupper(md5(uniqid(rand(), true)));
+//     $hyphen = chr(45);
+//     $uuid = substr($charid, 0, 8).$hyphen
+//         	.substr($charid, 8, 4).$hyphen
+//         	.substr($charid,12, 4).$hyphen
+//             .substr($charid,16, 4).$hyphen
+//         	.substr($charid,20,12);
+//     return $uuid;
+// }
 
-# Header HTML block
-# parameters:
-#	title - string; fills in title tag, defaults to "Platform for Affective Game ANnotation"
-#	css - array of strings; additional stylesheet paths, defaults to None
+// Header HTML block
+// parameters:
+// 	title - string; fills in title tag, defaults to "Platform for Affective Game ANnotation"
+// 	css - array of strings; additional stylesheet paths, defaults to None
 echo
 	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
@@ -59,13 +61,13 @@ echo   ']</title>
 		<meta property="og:description" content=""/>
 		<meta property="og:type" content="website"/>
 
-		<link rel="stylesheet" type="text/css" href="static/css/base.css" />
+		<link rel="stylesheet" type="text/css" href="/static/css/base.css" />
 		';
 
 if(isset($css)){
 	foreach ($css as &$style) {
 		echo
-			'<link rel="stylesheet" type="text/css" href="static/css/'.$style.'" />
+			'<link rel="stylesheet" type="text/css" href="/static/css/'.$style.'" />
 			';
 	}
 }
@@ -80,7 +82,18 @@ echo
 				<div class="icon help">?</div>
 			</div>-->';
 		}
-		if (($current_page != "/annotation" || ($current_page == "/annotation" && $test_mode)) && $current_page != "/end" && $current_page != "/upload") {
+
+		if ($current_page != "/annotation" 
+			&& $current_page != "/end" 
+			&& $current_page != "/upload"
+			&& $current_page != "/play"
+			&& $current_page != "/collection"
+			// && explode("/", $current_page)[1] != "collection" 
+			// && explode("/", $current_page)[1] != "play" 
+			// && explode("/", $current_page)[1] != "play_demo"
+			// && explode("/", $current_page)[1] != "play_experiment"
+			// && explode("/", $current_page)[1] != "annotation_experiment"
+		) {
 			echo '
 			<header>
 				<div id="title">
