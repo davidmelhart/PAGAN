@@ -19,7 +19,7 @@ Your database needs the following tables set up:
 * **`reg_keys`**: `id, secret, created_at`
 * **`users`**: `id, username, email, affiliation, password, created_at`
 * **`password_resets`**: `id, email, token, created_at`
-* **`projects`**: `id, user_name, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, end_message, survey_link, sound, start_message, archived, upload_message, autofill_id, created_at`
+* **`projects`**: `id, username, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, end_message, survey_link, sound, start_message, archived, upload_message, autofill_id, created_at`
 * **`project_entries`**: `id, project_id, entry_id, source_type, source_url, original_name, type, created_at`
 * **`logs`**: `id, project_id, participant_id, session_id, time_stamp, videotime, annotation_value, original_name, annotation_type, entry_id`
 
@@ -28,34 +28,34 @@ If you are not experienced with mySQL or just want to set up the application qic
 **reg_keys**
 ```sql
 CREATE TABLE reg_keys (
-	id INT(11) NOT NULL AUTO_INCREMENT,
-	secret VARCHAR(6),
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  secret VARCHAR(6),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-   	PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 ```
 
 **users**
 ```sql
 CREATE TABLE users (
-	id INT(11) NOT NULL AUTO_INCREMENT,
-    user_name VARCHAR(50),
+  id INT(11) NOT NULL AUTO_INCREMENT,
+    username VARCHAR(50),
     email VARCHAR(50),
     affiliation VARCHAR(50),
     password VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-   	PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 ```
 
 **password_resets**
 ```sql
 CREATE TABLE password_resets (
-	id INT(11) NOT NULL AUTO_INCREMENT,
-	email VARCHAR(50),
-	token VARCHAR(255),
+  id INT(11) NOT NULL AUTO_INCREMENT,
+  email VARCHAR(50),
+  token VARCHAR(255),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-   	PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 ```
 
@@ -63,7 +63,7 @@ CREATE TABLE password_resets (
 ```sql
 CREATE TABLE projects (
     id INT(11) NOT NULL AUTO_INCREMENT,
-    user_name VARCHAR(50),
+    username VARCHAR(50),
     project_id VARCHAR(36),
     project_name VARCHAR(100),
     target VARCHAR(30),
@@ -76,12 +76,12 @@ CREATE TABLE projects (
     end_message VARCHAR(255),
     survey_link VARCHAR(255),
     sound VARCHAR(3),
-	start_message VARCHAR(255),
-	archived VARCHAR(5),
-	upload_message VARCHAR(500),
-	autofill_id VARCHAR(11),
+  start_message VARCHAR(255),
+  archived VARCHAR(5),
+  upload_message VARCHAR(500),
+  autofill_id VARCHAR(11),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-   	PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 ```
 
@@ -96,7 +96,7 @@ CREATE TABLE project_entries (
     original_name VARCHAR(128),
     type VARCHAR(50),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-   	PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 ```
 
@@ -113,6 +113,17 @@ CREATE TABLE logs (
     original_name VARCHAR(128),
     annotation_type VARCHAR(10),
     entry_id VARCHAR(36),
-   	PRIMARY KEY (id)
+    PRIMARY KEY (id)
 );
 ```
+
+## Creating your First User
+The platform handles passwords in a secure way, and subsequently does not allow for storing unencrypted passes on the database. To start using the platform, the easiest way to set up a user is to create a registration key and register through the site.
+
+To create a new registration key, you can use the following SQL commad:
+```sql
+INSERT INTO reg_keys (secret) VALUES (123456);
+```
+After the key has been created, you can register on your own platform with the *123456* key.
+
+While setting up your user might seem a bit inconvenient, this system assures that only specific people have access to your platform and their login information is stored securely. If you are working with other researchers, you can create and share registration keys with them as well.
