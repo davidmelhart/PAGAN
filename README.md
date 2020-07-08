@@ -1,6 +1,6 @@
 # PAGAN [Platform for Audiovisual General-purpose Annotation]
 
-You can find the app hosted by the Institute of Digital Games at [pagan.institutedigitalgames.com/](http://pagan.institutedigitalgames.com/).
+You can find the app hosted by the Institute of Digital Games at [pagan.institutedigitalgames.com](http://pagan.institutedigitalgames.com/) and on my personal site [pagan.davidmelhart.com](http://pagan.davidmelhart.com/).
 
 This repository contains the sourcefiles to set up your own server and use both YouTube videos and uploaded videos for gathering annotations.
 
