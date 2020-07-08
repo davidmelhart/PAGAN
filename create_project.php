@@ -577,10 +577,10 @@ include("header.php");
             <div class="form-group">
                 <label>Project Source</label>
                 <div id="source-select">
-                    <!--<input type="radio" name="source_type" value="upload" checked> <span>Uploaded Videos</span>-->
+                    <input type="radio" name="source_type" value="upload" checked> <span>Uploaded Videos</span>
                     <input type="radio" name="source_type" value="youtube"> <span>YouTube</span><br>
                     <hr>
-                    <!--<input type="radio" name="source_type" value="user_upload"> <span>Subject Upload</span>-->
+                    <input type="radio" name="source_type" value="user_upload"> <span>Subject Upload</span>
                     <input type="radio" name="source_type" value="user_youtube"> <span>Subject Youtube</span>
                 </div>
                 <div class="form-group <?php echo (!empty($source_url_err)) ? 'has-error' : ''; ?>" id="project-entries">
