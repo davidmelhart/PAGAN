@@ -26,7 +26,7 @@ function getGUID(){
 
 $title = 'Platform for Affective Game ANnotation';
 $css = ['researcher.css', 'forms.css'];
- 
+
 // Check if the user is logged in, if not then redirect him to login page
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
@@ -66,7 +66,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $source_url_err = "Sorry, only MP4, MPEG & AVI files are allowed.";
             }
             // Check file size
-            if ($_FILES["file"]["size"][$x] > 100*MB) {
+            if ($_FILES["file"]["size"][$x] > 1000*MB) {
                 $source_url_err = "Sorry, the file is too large.";
             }
         }
@@ -78,14 +78,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else{
         // Prepare a select statement
         $sql = "SELECT id FROM projects WHERE project_name = :project_name";
-        
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":project_name", $param_project_name, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_project_name = trim($_POST["project_name"]);
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 $project_name = trim($_POST["project_name"]);
@@ -103,14 +103,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else{
         // Prepare a select statement
         $sql = "SELECT id FROM projects WHERE target = :target";
-        
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":target", $param_target, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_target = trim($_POST["target"]);
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 $target = trim($_POST["target"]);
@@ -125,14 +125,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get annotation type
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE type = :type";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":type", $param_type, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_type = trim($_POST["type"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $type = trim($_POST["type"]);
@@ -146,14 +146,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get source_type
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE source_type = :source_type";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":source_type", $param_source_type, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_source_type = trim($_POST["source_type"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $source_type = trim($_POST["source_type"]);
@@ -163,7 +163,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
     // Close statement
     unset($stmt);
-    
+
     // Validate source_url
     if(count($_POST["source_url"]) == 1 && $source_type == "youtube"){
         $source_url_err = "Please enter at least one url to your video.";
@@ -175,14 +175,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get video_loading method
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE video_loading = :video_loading";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":video_loading", $param_video_loading, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_video_loading = trim($_POST["video_loading"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $video_loading = trim($_POST["video_loading"]);
@@ -196,14 +196,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get endless mode
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE endless = :endless";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":endless", $param_endless, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_endless = trim($_POST["endless"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $endless = trim($_POST["endless"]);
@@ -220,7 +220,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get video_loading method
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE n_of_entries = :n_of_entries AND n_of_participant_runs = :n_of_participant_runs";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":n_of_entries", $param_n_of_entries, PDO::PARAM_STR);
@@ -244,7 +244,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             }
         }
 
-        $param_n_of_participant_runs = $actual_runs;    
+        $param_n_of_participant_runs = $actual_runs;
 
         // Attempt to execute the prepared statement
         if($stmt->execute()){
@@ -264,14 +264,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get sound
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE sound = :sound";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":sound", $param_sound, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_sound = trim($_POST["video_sound"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $sound = trim($_POST["video_sound"]);
@@ -285,14 +285,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get upload message
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE upload_message = :upload_message";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":upload_message", $param_upload_message, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_upload_message = htmlspecialchars(trim($_POST["upload-message"]), ENT_QUOTES, "UTF-8");
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $upload_message = trim($_POST["upload-message"]);
@@ -306,14 +306,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get start message
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE start_message = :start_message";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":start_message", $param_start_message, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_start_message = htmlspecialchars(trim($_POST["start-message"]), ENT_QUOTES, "UTF-8");
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $start_message = trim($_POST["start-message"]);
@@ -327,14 +327,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get end message
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE end_message = :end_message";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":end_message", $param_end_message, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_end_message = htmlspecialchars(trim($_POST["end-message"]), ENT_QUOTES, "UTF-8");
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $end_message = trim($_POST["end-message"]);
@@ -348,14 +348,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get survey link
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE survey_link = :survey_link";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":survey_link", $param_survey_link, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_survey_link = trim($_POST["survey-link"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $survey_link = trim($_POST["survey-link"]);
@@ -369,14 +369,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Get autofill id
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE autofill_id = :autofill_id";
-    
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":autofill_id", $param_autofill_id, PDO::PARAM_STR);
-        
+
         // Set parameters
         $param_autofill_id = trim($_POST["autofill-id"]);
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             $autofill_id = trim($_POST["autofill-id"]);
@@ -389,11 +389,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     // Check input errors before inserting in database
     if(empty($project_name_err) && empty($target_err) && empty($source_url_err)){
-        
+
         // Prepare an insert statement
-        $sql = "INSERT INTO projects (username, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_link, autofill_id, archived) 
+        $sql = "INSERT INTO projects (username, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_link, autofill_id, archived)
         VALUES (:username, :project_id, :project_name, :target, :type, :source_type, :video_loading, :endless, :n_of_entries, :n_of_participant_runs, :sound, :upload_message, :start_message, :end_message, :survey_link, :autofill_id, :archived)";
-         
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
@@ -440,7 +440,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 echo "Something went wrong. Please try again later.";
             }
         }
-         
+
         // Close statement
         unset($stmt);
 
@@ -462,7 +462,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
             // Prepare a select statement
             $sql = "SELECT id FROM project_entries WHERE source_url = :source_url AND entry_id = :entry_id";
-            
+
             if($stmt = $pdo->prepare($sql)){
                 // Bind variables to the prepared statement as parameters
                 $stmt->bindParam(":source_url", $param_source_url, PDO::PARAM_STR);
@@ -477,7 +477,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     $param_source_url = trim($_POST["source_url"][$x]);
                     $param_original_name = explode("=", $param_source_url)[1];
                 }
-                
+
                 // Attempt to execute the prepared statement
                 if($stmt->execute()){
                     $entry_id = $x+1;
@@ -494,11 +494,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             }
             // Close statement
             unset($stmt);
-            
+
             // Prepare an insert statement
-            $sql = "INSERT INTO project_entries (project_id, entry_id, source_type, source_url, original_name) 
+            $sql = "INSERT INTO project_entries (project_id, entry_id, source_type, source_url, original_name)
             VALUES (:project_id, :entry_id, :source_type, :source_url, :original_name)";
-             
+
             if($stmt = $pdo->prepare($sql)){
                 // Bind variables to the prepared statement as parameters
                 $stmt->bindParam(":project_id", $param_project_id, PDO::PARAM_STR);
@@ -513,7 +513,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $param_source_type = $source_type;
                 $param_source_url = $source_url;
                 $param_original_name = $original_name;
-                
+
                 // Attempt to execute the prepared statement
                 if($stmt->execute()){
                     // If successful, also upload files
@@ -533,7 +533,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Close statement
             unset($stmt);
         }
-         
+
     }
 
     // Close connection
@@ -632,10 +632,10 @@ include("header.php");
                 <input type="reset" class="button" value="reset">
             </div>
         </form>
-    </div>    
+    </div>
 <?php
     $scripts = ['create_project.js'];
-    include("scripts.php");   
+    include("scripts.php");
     $tooltip = '';
     include("footer.php");
 ?>

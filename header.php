@@ -8,8 +8,6 @@
 //     $_COOKIE['user'] = $id;
 // }
 
-// $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
-
 // # Generates GUID for username
 // function getGUID(){
 //     mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
@@ -27,6 +25,9 @@
 // parameters:
 // 	title - string; fills in title tag, defaults to "Platform for Affective Game ANnotation"
 // 	css - array of strings; additional stylesheet paths, defaults to None
+
+$current_page = basename($_SERVER["SCRIPT_FILENAME"], '.php');
+
 echo
 	'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Frameset//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-frameset.dtd">
@@ -43,14 +44,14 @@ echo   ']</title>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-		<link rel="apple-touch-icon" sizes="180x180" href="/static/favicon/apple-touch-icon.png">
-		<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon/favicon-32x32.png">
-		<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon/favicon-16x16.png">
-		<link rel="manifest" href="/static/favicon/site.webmanifest">
-		<link rel="shortcut icon" href="/static/favicon/favicon.ico">
+		<link rel="apple-touch-icon" sizes="180x180" href="./static/favicon/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="./static/favicon/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="./static/favicon/favicon-16x16.png">
+		<link rel="manifest" href="./static/favicon/site.webmanifest">
+		<link rel="shortcut icon" href="./static/favicon/favicon.ico">
 		<meta name="msapplication-TileColor" content="#343434">
-		<meta name="msapplication-config" content="/static/favicon/browserconfig.xml">
-		<link rel="shortcut icon" href="/static/favicon/favicon-16x16.png" type="image/x-icon" />
+		<meta name="msapplication-config" content="./static/favicon/browserconfig.xml">
+		<link rel="shortcut icon" href="./static/favicon/favicon-16x16.png" type="image/x-icon" />
 		<link href="https://fonts.googleapis.com/css?family=Raleway:400,600,900" rel="stylesheet">
 		<meta name="theme-color" content="#191919" />
 
@@ -61,13 +62,13 @@ echo   ']</title>
 		<meta property="og:description" content=""/>
 		<meta property="og:type" content="website"/>
 
-		<link rel="stylesheet" type="text/css" href="/static/css/base.css" />
+		<link rel="stylesheet" type="text/css" href="./static/css/base.css" />
 		';
 
 if(isset($css)){
 	foreach ($css as &$style) {
 		echo
-			'<link rel="stylesheet" type="text/css" href="/static/css/'.$style.'" />
+			'<link rel="stylesheet" type="text/css" href="./static/css/'.$style.'" />
 			';
 	}
 }
@@ -83,16 +84,11 @@ echo
 			</div>-->';
 		}
 
-		if ($current_page != "/annotation" 
-			&& $current_page != "/end" 
-			&& $current_page != "/upload"
-			&& $current_page != "/play"
-			&& $current_page != "/collection"
-			// && explode("/", $current_page)[1] != "collection" 
-			// && explode("/", $current_page)[1] != "play" 
-			// && explode("/", $current_page)[1] != "play_demo"
-			// && explode("/", $current_page)[1] != "play_experiment"
-			// && explode("/", $current_page)[1] != "annotation_experiment"
+		if ($current_page != "annotation"
+			&& $current_page != "end"
+			&& $current_page != "upload"
+			// && $current_page != "play"
+			// && $current_page != "collection"
 		) {
 			echo '
 			<header>

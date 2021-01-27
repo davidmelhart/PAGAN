@@ -56,8 +56,8 @@ include("header.php");
 			<img src="./static/img/uom-logo.png" style="width: 200px" />
 		</div>
 		<p>The tool is free for scientific use. An open test application can be found on the <a href="./howto.php">How To & Test</a> page.</p>
-		<p>Students and researchers interested in using the framework should send an email to 
-			<a href="mailto:david.melhart@um.edu.mt?subject=Requesting PAGAN access" target="_blank">david.melhart [at] um.edu.mt</a> 
+		<p>Students and researchers interested in using the framework should send an email to
+			<a href="mailto:david.melhart@um.edu.mt?subject=Requesting PAGAN access" target="_blank">david.melhart [at] um.edu.mt</a>
 		with a pargraph describing their project to gain access to the full project creation and management functionalities.</p>
 
 		<!--<p>If you use PAGAN in your scientific work, please cite as:
@@ -69,7 +69,7 @@ include("header.php");
         </ol>
     </div>
 <?php
-    include("scripts.php");   
+    include("scripts.php");
     $tooltip = '';
     include("footer.php");
 ?>

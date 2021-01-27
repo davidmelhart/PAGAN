@@ -15,6 +15,8 @@ The quality of the code can be improved both on the app and the server side, tre
 ## Database Setup
 Use the `config.php` file to set up the credentials to your connection.
 
+**Create a new database named `pagan`!**
+
 Your database needs the following tables set up:
 * **`reg_keys`**: `id, secret, created_at`
 * **`users`**: `id, username, email, affiliation, password, created_at`

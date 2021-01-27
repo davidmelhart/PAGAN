@@ -36,7 +36,7 @@
     if (isset($_COOKIE['session_id'])) {
         $session_id = $_COOKIE['session_id'];
     } else {
-        $session_id = getGUID();    
+        $session_id = getGUID();
     }
     $progress = array();
     $current_run;
@@ -63,7 +63,9 @@
             $n_of_entries = 1;
             $n_of_participant_runs = 1;
         } else {
-            $entry_id = htmlspecialchars($_GET['entry'], ENT_QUOTES, "UTF-8");
+            if (isset($_GET['entry'])) {
+                $entry_id = htmlspecialchars($_GET['entry'], ENT_QUOTES, "UTF-8");
+            }
             $sql = "SELECT * FROM projects WHERE project_id = :project_id LIMIT 1";
             $stmt = $pdo->prepare($sql);
             $stmt->bindParam(":project_id", $project_id, PDO::PARAM_STR);
@@ -85,7 +87,7 @@
             }
             // Close statement
             unset($stmt);
-            // Manage book-keeping cookie    
+            // Manage book-keeping cookie
             if(isset($_COOKIE['progress'])){
                 $progress = json_decode($_COOKIE['progress'], true);
                 // Check ongoing project
@@ -116,6 +118,10 @@
                     setcookie('progress', json_encode($progress), strtotime('+7 days'), '/', $_SERVER['HTTP_HOST']);
                 }
             } else {
+                if (!isset($progress_entry)){
+                    $progress_entry = $project_id;
+                }
+
                 $progress_entry->project_id =  $project_id;
                 $progress_entry->seen = array();
                 $progress_entry->n_runs = 0;
@@ -131,7 +137,7 @@
             if ($stmt->execute()) {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     if (!in_array($row['entry_id'], $current_run['seen'])) {
-                        $available_entries[] = $row;    
+                        $available_entries[] = $row;
                     }
                 }
             } else {
@@ -166,7 +172,7 @@
                 // Close statement
                 unset($stmt);
             }
-            
+
             // Close connection
             unset($pdo);
         }
@@ -201,7 +207,7 @@
 
 <div class="inner">
     <div class="annotation-container">
-        <?php 
+        <?php
             if ($test_mode > 0) {
                 echo "<div id=test-tag>test mode</div>";
             }
@@ -210,7 +216,7 @@
             <div>
                 <?php
                     if($endless !== 'on') {
-                        echo '<p class=counter>video '.(string)($current_run['n_runs']+1).' out of '.(string)$n_of_participant_runs.'</p>';     
+                        echo '<p class=counter>video '.(string)($current_run['n_runs']+1).' out of '.(string)$n_of_participant_runs.'</p>';
                     }
                     if($started_project < 1){
                         echo '<p class="welcome">Welcome to '.$project_name.'!</p>';
@@ -234,7 +240,7 @@
 
                     if (!empty($message)){
                         echo '<p><strong>*</strong>'.$message.'</p>';
-                    }   
+                    }
                 ?>
                 <p id='video-load-notice' style="height: 35px;">Please wait. Your video is loading...</p>
                 <p><span id='video-load-icon' class="key wait"></span></p>
@@ -309,7 +315,7 @@
                         echo '<span>decrease</span>';
                         echo '<span class="key scroll-down"></span>';
                     }
-                    
+
                 echo '</div>';
             }
             ?>

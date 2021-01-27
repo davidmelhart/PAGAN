@@ -26,7 +26,7 @@
 
 $title = 'Platform for Affective Game ANnotation';
 $css = ['researcher.css'];
- 
+
 // Check if the user is logged in, if not then redirect him to login page
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
@@ -60,17 +60,17 @@ include("header.php");
         <div class="projects-buttons"><a class="button" href="./archived.php">archived projects</a><a class="button" href="./create_project.php">add a new project</a></div>
     </div>
     <div>
-        <?php 
+        <?php
             if($length_stmt->rowCount() < 1){
                 echo "You have no live projects.";
             } else {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $filename = str_replace(" ","-",$row['project_name']).'_'.$row['target'].'_'.$row['type'].'_log_'.explode(' ', $row['created_at'])[0];
-                    
+
                     $project_id = $row['project_id'];
                     $sql = "SELECT participant_id FROM logs WHERE project_id = :project_id";
                     $stmt2 = $pdo->prepare($sql);
-                    $stmt2->bindParam(":project_id", $project_id, PDO::PARAM_STR);                
+                    $stmt2->bindParam(":project_id", $project_id, PDO::PARAM_STR);
                     $stmt2->execute();
                     $participants = array();
                     while ($participant = $stmt2->fetch(PDO::FETCH_ASSOC)) {
@@ -85,7 +85,7 @@ include("header.php");
                                     <div>
                                         <h2>'.$row['project_name'].'</h2>
                                         <h3>a <span class="project-info">project<span class="project-info-box">
-                                                    <p><strong>annotation type:</strong> '.$rosw['type'].'</p>
+                                                    <p><strong>annotation type:</strong> '.$row['type'].'</p>
                                                     <p><strong>source type:</strong> '.$row['source_type'].'</p>
                                                     <p><strong>video loading:</strong> '.$row['video_loading'].'</p>
                                                     <p><strong>endless mode:</strong> '.$row['endless'].'</p>
@@ -111,7 +111,7 @@ include("header.php");
                                 </div>
                                 <div class="bottom-box">
                                     <div class="link-box">
-                                        <input class="link" value="'.$_SERVER['HTTP_HOST'].'/annotation.php?id='.$row['project_id'].'"/>
+                                        <input class="link" value="'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/annotation.php?id='.$row['project_id'].'"/>
                                         <a class="button video" href="./annotation.php?id='.$row['project_id'].'&test_mode=True" target="_blank">test ';
                                         if ($row['source_type'] == 'user_youtube' || $row['source_type'] == 'user_upload') {
                                             echo 'upload';
@@ -136,7 +136,7 @@ include("header.php");
 
 <?php
     $scripts = ['researcher.js'];
-    include("scripts.php");   
+    include("scripts.php");
     $tooltip = '';
     include("footer.php");
 ?>

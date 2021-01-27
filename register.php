@@ -26,34 +26,34 @@
 
 $title = 'Platform for Affective Game ANnotation';
 $css = ['researcher.css', 'forms.css'];
- 
+
 // Check if the user is already logged in, if yes then redirect him to welcome page
 if(isset($_SESSION["loggedin"]) && $_SESSION["loggedin"] === true){
     header("location: projects.php");
     exit;
 }
- 
+
 // Define variables and initialize with empty values
 $username = $email = $affiliation = $password = $confirm_password = $secret = "";
 $username_err = $email_err = $affiliation_err = $password_err = $confirm_password_err = $secret_err = "";
- 
+
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
- 
+
     // Validate username
     if(empty(trim($_POST["username"]))){
         $username_err = "Please enter a username.";
     } else{
         // Prepare a select statement
         $sql = "SELECT id FROM users WHERE username = :username";
-        
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_username = trim($_POST["username"]);
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 if($stmt->rowCount() == 1){
@@ -65,7 +65,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 echo "Oops! Something went wrong. Please try again later.";
             }
         }
-         
+
         // Close statement
         unset($stmt);
     }
@@ -76,14 +76,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else{
         // Prepare a select statement
         $sql = "SELECT id FROM users WHERE email = :email";
-        
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":email", $param_email, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_email = trim($_POST["email"]);
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 if($stmt->rowCount() == 1){
@@ -95,7 +95,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 echo "Oops! Something went wrong. Please try again later.";
             }
         }
-         
+
         // Close statement
         unset($stmt);
     }
@@ -106,14 +106,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else{
         // Prepare a select statement
         $sql = "SELECT id FROM users WHERE affiliation = :affiliation";
-        
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":affiliation", $param_affiliation, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_affiliation = trim($_POST["affiliation"]);
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 $affiliation = trim($_POST["affiliation"]);
@@ -121,52 +121,52 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 echo "Oops! Something went wrong. Please try again later.";
             }
         }
-         
+
         // Close statement
         unset($stmt);
     }
 
     // Validate password
     if(empty(trim($_POST["password"]))){
-        $password_err = "Please enter a password.";     
+        $password_err = "Please enter a password.";
     } elseif(strlen(trim($_POST["password"])) < 6){
         $password_err = "Password must have atleast 6 characters.";
     } else{
         $password = trim($_POST["password"]);
     }
-    
+
     // Validate confirm password
     if(empty(trim($_POST["confirm_password"]))){
-        $confirm_password_err = "Please confirm password.";     
+        $confirm_password_err = "Please confirm password.";
     } else{
         $confirm_password = trim($_POST["confirm_password"]);
         if(empty($password_err) && ($password != $confirm_password)){
             $confirm_password_err = "Password did not match.";
         }
     }
-    
+
     // Validate secret
     if(empty(trim($_POST["secret"]))){
         $secret_err = "Please enter your registration key.";
     } else{
         // Prepare a select statement
         $sql = "SELECT id FROM reg_keys WHERE secret = :secret";
-        
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":secret", $param_secret, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_secret = trim($_POST["secret"]);
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 if($stmt->rowCount() == 1){
                     $row = $stmt->fetch();
                     $key_id = $row['id'];
-                    $del = $pdo->prepare("DELETE FROM reg_keys WHERE id = :id");
-                    $del->bindParam(":id", $key_id, PDO::PARAM_STR);
-                    $del->execute();
+                    // $del = $pdo->prepare("DELETE FROM reg_keys WHERE id = :id");
+                    // $del->bindParam(":id", $key_id, PDO::PARAM_STR);
+                    // $del->execute();
                 } else{
                     $secret_err = "Registration key does not exist.";
                 }
@@ -174,43 +174,72 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 echo "Oops! Something went wrong. Please try again later.";
             }
         }
-         
+
         // Close statement
         unset($stmt);
     }
 
     // Check input errors before inserting in database
     if(empty($username_err) && empty($email_err) && empty($affiliation_err) && empty($password_err) && empty($confirm_password_err) && empty($secret_err)){
-        
+
         // Prepare an insert statement
         $sql = "INSERT INTO users (username, email, affiliation, password) VALUES (:username, :email, :affiliation, :password)";
-         
+
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
             $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
             $stmt->bindParam(":email", $param_email, PDO::PARAM_STR);
             $stmt->bindParam(":affiliation", $param_affiliation, PDO::PARAM_STR);
             $stmt->bindParam(":password", $param_password, PDO::PARAM_STR);
-            
+
             // Set parameters
             $param_username = $username;
             $param_email = $email;
             $param_affiliation = $affiliation;
             $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
-            
+
             // Attempt to execute the prepared statement
             if($stmt->execute()){
+                // Prepare a select statement
+                $sql2 = "SELECT id FROM reg_keys WHERE secret = :secret";
+
+                if($stmt2 = $pdo->prepare($sql2)){
+                    // Bind variables to the prepared statement as parameters
+                    $stmt2->bindParam(":secret", $param_secret, PDO::PARAM_STR);
+
+                    // Set parameters
+                    $param_secret = trim($_POST["secret"]);
+
+                    // Attempt to execute the prepared statement
+                    if($stmt2->execute()){
+                        if($stmt2->rowCount() == 1){
+                            $row = $stmt2->fetch();
+                            $key_id = $row['id'];
+                            $del = $pdo->prepare("DELETE FROM reg_keys WHERE id = :id");
+                            $del->bindParam(":id", $key_id, PDO::PARAM_STR);
+                            $del->execute();
+                        } else{
+                            $secret_err = "Registration key does not exist.";
+                        }
+                    } else{
+                        echo "Oops! Something went wrong. Please try again later.";
+                    }
+                }
+
+                // Close statement
+                unset($stmt2);
+
                 // Redirect to login page
                 header("location: login.php");
             } else{
                 echo "Something went wrong. Please try again later.";
             }
         }
-         
+
         // Close statement
         unset($stmt);
     }
-    
+
     // Close connection
     unset($pdo);
 }
@@ -228,7 +257,7 @@ include("header.php");
         </div>
     </div>
 
-    <div class="wrapper">       
+    <div class="wrapper">
         <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
             <div class="form-group <?php echo (!empty($username_err)) ? 'has-error' : ''; ?>">
                 <label>Username</label>
@@ -250,7 +279,7 @@ include("header.php");
                     <option value="Tabriz University">
                     <option value="WWU Munster">
                 </datalist>
-            </div>    
+            </div>
             <div class="form-group <?php echo (!empty($password_err)) ? 'has-error' : ''; ?>">
                 <label>Password</label>
                 <span class="help-block"><?php echo $password_err; ?></span>
@@ -271,9 +300,9 @@ include("header.php");
                 <input type="reset" class="button" value="reset">
             </div>
         </form>
-    </div>    
+    </div>
 <?php
-    include("scripts.php");   
+    include("scripts.php");
     $tooltip = '';
     include("footer.php");
 ?>
