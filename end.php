@@ -59,7 +59,11 @@ echo '<div class="participant_id">ID: '.$_COOKIE['user'].'</div>';
                 }
                 if (!empty($survey)){
                 	if (!empty($autofill_id)){
-                		echo '<a class="button" href="'.$survey.'&entry.'.$autofill_id.'='.$participant_id.'">go to survey</a>';
+				$separator = '?';
+				if (strpos(end(explode('/', $survey)), '?') !== false) {
+				    $separator = '&';
+				}
+                		echo '<a class="button" href="'.$survey.$separator.'entry.'.$autofill_id.'='.$participant_id.'">go to survey</a>';
                 	} else {
 						echo '<a class="button" href="'.$survey.'">go to survey</a>';
                 	}
