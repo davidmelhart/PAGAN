@@ -1,11 +1,11 @@
 <?php
 /* Database credentials. Assuming you are running MySQL
 server with default setting (user 'root' with no password) */
-define('DB_SERVER', 'localhost');
-define('DB_PORT', 3306);
-define('DB_NAME', 'pagan_test');
-define('DB_USERNAME', 'root');
-define('DB_PASSWORD', 'admin');
+define('DB_SERVER', 'your_server');
+define('DB_PORT', port_number);
+define('DB_NAME', 'your_db_name');
+define('DB_USERNAME', 'your_user');
+define('DB_PASSWORD', 'your_password');
 
 /* Attempt to connect to MySQL database */
 try{
