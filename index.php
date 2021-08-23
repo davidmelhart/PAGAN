@@ -48,6 +48,11 @@ include("header.php");
 
 		<p>PAGAN [Platform for Audiovisual General-purpose ANnotation] was designed to address these issues by providing an easy-to-use framework for multi-purpose audiovisual annotation.</p>
 
+		<p>If you use PAGAN in your scientific work, please cite it as:<br>
+		<span style="font-weight: 600">
+		Melhart D., Liapis A. & Yannakakis G. N. (2019). PAGAN: Video Affect Annotation Made Easy. In <i>Proceedings of the 8th International Conference on Affective Computing and Intelligent Interaction (ACII)</i>, Cambridge, United Kingdom.
+		</span></p>
+
 		<img src="./static/img/pagan_intro.png" />
 		<span class='subscript'>Left: PAGAN project creation; right: PAGAN annotation with RankTrace using the SEMAINE database<sup>1</sup>.</span>
 

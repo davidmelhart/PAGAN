@@ -5,11 +5,9 @@ session_start();
 // Generate User if User does not exists
 if(!isset($_COOKIE['user'])){
 $id = getGUID();
-  setcookie('user', $id, time()+315400000,"/");
-  $_COOKIE['user'] = $id;
+    setcookie('user', $id, time()+315400000,"/");
+    $_COOKIE['user'] = $id;
 }
-
-$current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
 
 // Generates GUID for username
 function getGUID(){
@@ -30,6 +28,7 @@ $css = ['forms.css'];
 $message = $survey = $autofill_id = "";
 $project_id = htmlspecialchars($_GET['id'], ENT_QUOTES, "UTF-8");
 $participant_id = $_COOKIE['user'];
+$past_sessions = array();
 
 if($_SERVER["REQUEST_METHOD"] == "GET"){
     $sql = "SELECT end_message, survey_link, autofill_id FROM projects WHERE project_id = :project_id LIMIT 1";
@@ -41,40 +40,54 @@ if($_SERVER["REQUEST_METHOD"] == "GET"){
     $survey = $project['survey_link'];
     $autofill_id = $project['autofill_id'];
     // Close statement
-    unset($stmt);       
-	// Close connection
-	unset($pdo);
+    unset($stmt);
+
+    $sql = "SELECT DISTINCT session_id FROM logs WHERE participant_id = :participant_id AND project_id = :project_id";
+    $stmt = $pdo->prepare($sql);
+    $param_user = $_COOKIE['user'];
+    $stmt->bindParam(":participant_id", $param_user, PDO::PARAM_STR);
+    $stmt->bindParam(":project_id", $project_id, PDO::PARAM_STR);
+    $stmt->execute();
+
+
+    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+        array_push($past_sessions, $row['session_id']);
+    }
+
+    // Close connection
+    unset($pdo);
 }
 include("header.php");
 
-echo '<div class="participant_id">ID: '.$_COOKIE['user'].'</div>';
+echo '<div class="participant_id">ID: '.$_COOKIE['user'].'<br>PAST SESSIONS:<br>'.implode("<br>", $past_sessions).'</div>';
 ?>
     <div id="end-messages">
         <div>
             <p>Thank you for participating in this experiment!</p>
             <?php
-                
+
                 if (!empty($message)){
                     echo '<p>'.$message.'</p>';
                 }
                 if (!empty($survey)){
-                	if (!empty($autofill_id)){
-				$separator = '?';
-				if (strpos(end(explode('/', $survey)), '?') !== false) {
-				    $separator = '&';
-				}
-                		echo '<a class="button" href="'.$survey.$separator.'entry.'.$autofill_id.'='.$participant_id.'">go to survey</a>';
-                	} else {
-						echo '<a class="button" href="'.$survey.'">go to survey</a>';
-                	}
-                    
-                } 
-	            
+                    if (!empty($autofill_id)){
+                        $separator = '?';
+                        if (strpos(end(explode('/', $survey)), '?') !== false) {
+                            $separator = '&';
+                        }
+
+                        echo '<a class="button" href="'.$survey.$separator.'entry.'.$autofill_id.'='.$participant_id.'">go to survey</a>';
+                    } else {
+                        echo '<a class="button" href="'.$survey.'">go to survey</a>';
+                    }
+
+                }
+
             ?>
         <div>
     </div>
 <?php
-    include("scripts.php");   
+    include("scripts.php");
     $tooltip = '';
     include("footer.php");
 ?>

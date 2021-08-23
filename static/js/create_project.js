@@ -1,5 +1,5 @@
 $("[name='type']")[0].defaultValue = "ranktrace";
-var selected = 'upload';
+var selected = 'youtube';
 
 $('[name="source_type"]').on('click', function(){
 	var youtubeSource = $('.youtube-source');
@@ -8,7 +8,7 @@ $('[name="source_type"]').on('click', function(){
 	var subjectUpload = $('.subject-upload')
 
 	selected = $(this).val();
-	
+
 	if(selected == 'youtube'){
 		youtubeSource.removeClass('hidden');
 		fileSource.addClass('hidden');
@@ -72,23 +72,38 @@ $('[name="endless"]').on('click', function(){
 });
 
 var lastYouTube = "";
-$(document).on("change paste keyup", function() {
-	if($('.youtube-source:last-of-type').val() != ""){
-		$('#project-entries').append('<input type="text" name="source_url[]" class="form-control youtube-source" value="">');
-	}
-	if ($('.youtube-source').length > 1){
-		for(var i = 0; i < $('.youtube-source').length-1; i++){
-			if($($('.youtube-source')[i]).val() == ""){
-				$($('.youtube-source')[i]).remove();
-			}
+var n_entry = 0;
+$(document).on("change paste keyup cut", function() {
+	setTimeout(function function_name(argument) {
+		if($('.youtube-source:last-of-type').val() != ""){
+			$('#project-entries').append('<input type="text" name="source_url[]" class="form-control youtube-source" value="">');
 		}
-	}
+		if ($('.youtube-source').length > 1){
 
-	if (selected == "youtube"){
-		$('#entry-n')[0].innerHTML = $('.youtube-source').length-1;
-	} else if(selected == 'upload'){
-		$('#entry-n')[0].innerHTML = $('#file-source')[0]['files'].length;
-	}
+				for(var i = 0; i < $('.youtube-source').length-1; i++){
+					if($($('.youtube-source')[i]).val() == ""){
+						if ($($('.youtube-source')[i]).length) {
+							$($('.youtube-source')[i]).remove();
+						}
+					}
+				}
+		}
+
+		if (selected == "youtube"){
+			n_entry = $('.youtube-source').length-1;
+			$('[name="n_of_participant_runs"]').attr('max', n_entry);
+			$('#entry-n').html(n_entry);
+		} else if(selected == 'upload'){
+			n_entry = $('#file-source')[0]['files'].length;
+			$('[name="n_of_participant_runs"]').attr('max', n_entry);
+			$('#entry-n').html(n_entry);
+		}
+
+		if (parseInt($('[name="n_of_participant_runs"]').attr('max')) <= parseInt($('[name="n_of_participant_runs"]').val())){
+			$('[name="n_of_participant_runs"]').val($('[name="n_of_participant_runs"]').attr('max'));
+			$('#n_run-value').html($('[name="n_of_participant_runs"]').attr('max'));
+		}
+	}, 100);
 });
 
 $('[type="reset"]').on("click", function(){
@@ -99,3 +114,73 @@ $('[type="reset"]').on("click", function(){
 		$($('.youtube-source')[i]).remove();
 	}
 })
+
+$('[name="tolerance"]').on('input', function() {
+    $('#tolerance-value').html(this.value);
+});
+
+$('[name="ranktrace_rate"]').on('input', function() {
+	let smoothValue = this.value;
+	if (smoothValue == 0){
+		$('#ranktrace_rate-value').html("<b>No smoothing.</b>");
+	} else {
+		let displayValue = Math.ceil(smoothValue*33.33333333);
+		if (displayValue >= 1000){
+			displayValue = (displayValue/1000) + "sec";
+		} else {
+			displayValue = displayValue + "ms";
+		}
+
+		$('#ranktrace_rate-value').html("Update graph at a <b>" + displayValue + "</b> interval.");
+	}
+
+});
+
+$('[name="type"]').on('input', function() {
+	if (this.value == "ranktrace"){
+		$('#gtrace-config').addClass('hidden');
+		$('#ranktrace-config').removeClass('hidden');
+	} else if (this.value == "gtrace"){
+		$('#gtrace-config').removeClass('hidden');
+		$('#ranktrace-config').addClass('hidden');
+	} else {
+		$('#gtrace-config').addClass('hidden');
+		$('#ranktrace-config').addClass('hidden');
+	}
+});
+
+$('[name="n_of_participant_runs"]').on('input', function() {
+	$('#n_run-value').html(this.value);
+});
+
+$('[name="gtrace_control"]').on('input', function() {
+	if (this.value == "keyboard") {
+		$('#mouse-click-box').addClass('hidden');
+		$('#rate-box').removeClass('hidden');
+	} else {
+		$('#mouse-click-box').removeClass('hidden');
+		if ($('[name="gtrace_update"]:checked').val() == "on"){
+			$('#rate-box').removeClass('hidden');
+		} else {
+			$('#rate-box').addClass('hidden');
+		}
+	}
+});
+
+$('[name="gtrace_update"]').on('input', function() {
+	if ($('[name="gtrace_update"]:checked').val() == "on"){
+		$('#rate-box').removeClass('hidden');
+	} else {
+		$('#rate-box').addClass('hidden');
+	}
+});
+
+$('[name="gtrace_rate"]').on('input', function() {
+	let displayValue = this.value;
+	if (displayValue >= 1000){
+		displayValue = (displayValue/1000) + "sec";
+	} else {
+		displayValue = displayValue + "ms";
+	}
+	$('#gtrace_rate-value').html("Update graph at a <b>" + displayValue + "</b> interval.");
+});

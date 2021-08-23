@@ -10,8 +10,6 @@
       $_COOKIE['user'] = $id;
   }
 
-  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
-
   // Generates GUID for username
   function getGUID(){
       mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.

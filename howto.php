@@ -46,6 +46,12 @@ include("header.php");
     </div>
     <div class="main-text">
         <h2>Overview</h2>
+
+        <p>If you use PAGAN in your scientific work, please cite it as:<br>
+        <span style="font-weight: 600">
+        Melhart D., Liapis A. & Yannakakis G. N. (2019). PAGAN: Video Affect Annotation Made Easy. In <i>Proceedings of the 8th International Conference on Affective Computing and Intelligent Interaction (ACII)</i>, Cambridge, United Kingdom.
+        </span></p>
+
         <p>PAGAN can run in any browser and only requries a desktop computer with a conventinal keyboard for the annotator application to work. The framework consists of an administrative dashboard for researchers (accessible under <a href="./projects.php">My Projects</a>) and a separate participant interface to minimise distraction during the annotation process.</p>
 
         <h2>Participant Interface & Annotator Application</h2>
@@ -53,7 +59,7 @@ include("header.php");
         <span class="subscript">Greeting screen in the beginning of the annotation.</span>
 
         <p>PAGAN supports three different kind of annotation frameworks, <strong>GTrace<sup>1</sup></strong>, based on a popular annotation protocol in affective computing, <strong>RankTrace<sup>2</sup></strong>, an intuitive solution for ordinal affect annotation, and <strong>BTrace<sup>3</sup></strong> a simplified binary labelling tool based on AffectRank.</p>
-        
+
         <img src="./static/img/annotation_types.png" />
         <span class="subscript">From top to bottom: GTrace, RankTrace, and BTrace interfaces.</span>
 
@@ -83,7 +89,7 @@ include("header.php");
         </ol>
     </div>
 <?php
-    include("scripts.php");   
+    include("scripts.php");
     $tooltip = '';
     include("footer.php");
 ?>

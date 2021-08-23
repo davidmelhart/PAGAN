@@ -1,5 +1,5 @@
 <?php
-    require_once "../config.php";    
+    require_once "../config.php";
 
 	$project_id = filter_input(INPUT_POST,'project_id',FILTER_SANITIZE_STRING);
 	$entry_id = filter_input(INPUT_POST,'entry_id',FILTER_SANITIZE_STRING);
@@ -12,5 +12,5 @@
             $progress[$key]['n_runs'] += 1;
         }
     }
-    setcookie('progress', json_encode($progress), strtotime('+7 days'), '/', $_SERVER['HTTP_HOST']);
+    setcookie('progress', json_encode($progress), strtotime('+7 days'), '/', $_SERVER['SERVER_NAME']);
 ?>

@@ -9,8 +9,6 @@
       $_COOKIE['user'] = $id;
   }
 
-  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
-
   // Generates GUID for username
   function getGUID(){
       mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
@@ -26,7 +24,7 @@
 
 $title = 'Platform for Affective Game ANnotation';
 $css = ['researcher.css'];
-
+ 
 // Check if the user is logged in, if not then redirect him to login page
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
     header("location: login.php");
@@ -60,17 +58,17 @@ include("header.php");
         <div class="projects-buttons"><a class="button" href="./archived.php">archived projects</a><a class="button" href="./create_project.php">add a new project</a></div>
     </div>
     <div>
-        <?php
+        <?php 
             if($length_stmt->rowCount() < 1){
                 echo "You have no live projects.";
             } else {
                 while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                     $filename = str_replace(" ","-",$row['project_name']).'_'.$row['target'].'_'.$row['type'].'_log_'.explode(' ', $row['created_at'])[0];
-
+                    
                     $project_id = $row['project_id'];
                     $sql = "SELECT participant_id FROM logs WHERE project_id = :project_id";
                     $stmt2 = $pdo->prepare($sql);
-                    $stmt2->bindParam(":project_id", $project_id, PDO::PARAM_STR);
+                    $stmt2->bindParam(":project_id", $project_id, PDO::PARAM_STR);                
                     $stmt2->execute();
                     $participants = array();
                     while ($participant = $stmt2->fetch(PDO::FETCH_ASSOC)) {
@@ -102,8 +100,11 @@ include("header.php");
                                         <span class="date">'.$row['created_at'].'</span><br>
                                         <span class="participants">'.$participants.' participants</span><br>
                                         <div class="button-box">';
-                                        if ($row['source_type'] == 'upload' || $row['source_type'] == 'user_upload') {
+                                        if ($row['source_type'] == 'upload' || $row['source_type'] == 'user_upload' || $row['source_type'] == 'game') {
                                             echo '<span><a class="button download" href="util/fetch_vid.php?project_id='.$row['project_id'].'">download videos</a></span>';
+                                        }
+                                        if ($row['source_type'] == 'game') {
+                                            echo '<br><span><a class="button download" href="util/fetch_telemetry.php?project_id='.$row['project_id'].'&filename='.$filename.'_telemetry">download telemetry</a></span>';
                                         }
                                             echo '<span><a class="button download" href="util/fetch_log.php?project_id='.$row['project_id'].'&filename='.$filename.'">download logs</a></span>
                                         </div>
@@ -111,7 +112,7 @@ include("header.php");
                                 </div>
                                 <div class="bottom-box">
                                     <div class="link-box">
-                                        <input class="link" value="'.$_SERVER['HTTP_HOST'].dirname($_SERVER['PHP_SELF']).'/annotation.php?id='.$row['project_id'].'"/>
+                                        <input class="link" value="'.$_SERVER['HTTP_HOST'].pathinfo($_SERVER['PHP_SELF'], PATHINFO_DIRNAME).'/annotation.php?id='.$row['project_id'].'"/>
                                         <a class="button video" href="./annotation.php?id='.$row['project_id'].'&test_mode=True" target="_blank">test ';
                                         if ($row['source_type'] == 'user_youtube' || $row['source_type'] == 'user_upload') {
                                             echo 'upload';
@@ -136,7 +137,7 @@ include("header.php");
 
 <?php
     $scripts = ['researcher.js'];
-    include("scripts.php");
+    include("scripts.php");   
     $tooltip = '';
     include("footer.php");
 ?>

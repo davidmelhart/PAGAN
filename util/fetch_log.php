@@ -15,7 +15,7 @@
 
         $response = implode(",", array('OriginalName', 'DatabaseName', 'Participant', 'SessionID', 'Timestamp','VideoTime','Value'))."\n";
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $databaseName = $project_id.'-'.$row['entry_id'];
+            $databaseName = $project_id.'_'.$row['entry_id'];
             $response .= implode(",",array($row['original_name'], $databaseName, $row['participant_id'], $row['session_id'], $row['time_stamp'], $row['videotime'], $row['annotation_value']))."\n";
         }
 

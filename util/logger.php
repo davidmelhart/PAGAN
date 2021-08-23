@@ -12,15 +12,14 @@
     $participant_id = $_COOKIE['user'];
 
     // Prepare an insert statement
-    $sql = "INSERT INTO logs (project_id, entry_id, participant_id, session_id, original_name, time_stamp, videotime, annotation_value, annotation_type) 
+    $sql = "INSERT INTO logs (project_id, entry_id, participant_id, session_id, original_name, time_stamp, videotime, annotation_value, annotation_type)
     VALUES (:project_id, :entry_id, :participant_id, :session_id, :original_name, :time_stamp, :videotime, :annotation_value, :annotation_type)";
-     
+
     if($stmt = $pdo->prepare($sql)){
         // Bind variables to the prepared statement as parameters
         $stmt->bindParam(":project_id", $param_project_id, PDO::PARAM_STR);
         $stmt->bindParam(":entry_id", $param_entry_id, PDO::PARAM_STR);
         $stmt->bindParam(":participant_id", $param_participant_id, PDO::PARAM_STR);
-        $stmt->bindParam(":session_id", $param_session_id, PDO::PARAM_STR);
         $stmt->bindParam(":session_id", $param_session_id, PDO::PARAM_STR);
         $stmt->bindParam(":original_name", $param_original_name, PDO::PARAM_STR);
         $stmt->bindParam(":time_stamp", $param_time_stamp, PDO::PARAM_INT);
@@ -38,7 +37,7 @@
         $param_videotime = $videotime;
         $param_annotation_value = $annotation_value;
         $param_annotation_type = $annotation_type;
-        
+
         // Attempt to execute the prepared statement
         if($stmt->execute()){
             // Redirect to login page

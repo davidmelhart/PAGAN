@@ -70,11 +70,17 @@ textarea.form-control {
   padding: 2px 20px;
 }
 
-[name="n_of_participant_runs"]{
+/*[name="n_of_participant_runs"]{
   border: none !important;
   border-radius: 0 !important;
   text-align: center !important;
   padding: 5px 20px !important;
+}*/
+
+input.form-control[type=range] {
+  border: none;
+  padding: 5px 0;
+  width: 90%;
 }
 
 #source-select {
@@ -86,7 +92,7 @@ textarea.form-control {
   padding: 5px 0;
 }
 
-#type-select, #loading, #participant-runs, #sound {
+#type-select, #loading, #participant-runs, #sound, #tolerance {
   background: #444444;
   color: #e6e4e3;
   border: 2px solid #343434;
