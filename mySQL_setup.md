@@ -1,5 +1,4 @@
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password
-BY 'admin';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'admin';
 
 CREATE TABLE `reg_keys` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
