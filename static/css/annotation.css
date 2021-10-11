@@ -3,6 +3,40 @@ p.welcome {
     font-size: 1.5em;
 }
 
+#main-content {
+  max-width: calc(100% - 40px);
+}
+
+.inner {
+  align-items: flex-start;
+  padding-top: 20px;
+}
+
+.participant_id {
+  background: #343434;
+  color: #e6e4e3;
+  position: relative;
+  z-index: 9;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.6em;
+  padding: 5px;
+  border-bottom: 3px solid #4d4d4d;
+}
+
+.participant_id span{
+  font-size: inherit;
+  line-height: 0;
+  position: relative;
+  top: initial;
+  padding-left: none;
+}
+
 .annotation-container {
   position: relative;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
@@ -17,8 +51,8 @@ p.welcome {
 .annotation-container > video {
   background: black;
   width: 100%;
-  height: calc(100vh - 186px);
-  max-height: 500px;
+  height: calc(100vh - 245px);
+  /*max-height: 500px;*/
   transition: opacity 0.3s;
 }
 
@@ -50,8 +84,8 @@ p.welcome {
 .annotation-container > #tutorial {
   background: #343434;
   width: 100%;
-  height: calc(100vh - 185px);
-  max-height: 501px;
+  height: calc(100vh - 245px);
+  /* max-height: 501px; */
   position: absolute;
   transition: all 0.3s;
   display: flex;
@@ -59,6 +93,7 @@ p.welcome {
   align-items: center;
   justify-content: center;
   z-index: 99;
+  top: 20px;
 }
 .annotation-container > #tutorial div {
   padding: 45px 45px 0;
@@ -85,6 +120,10 @@ p.welcome {
   height: 150px;
 }
 
+.annotation-container > #tutorial img:hover {
+  cursor: none;
+}
+
 .annotation-container > .messages div{
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
   position: absolute;
@@ -103,8 +142,8 @@ p.welcome {
 .annotation-container > #video-shade{
   background: black;
   width: 100%;
-  height: calc(100vh - 186px);
-  max-height: 500px;
+  height: calc(100vh - 245px);
+  /*max-height: 500px;*/
   position: absolute;
   opacity: 0.6;
   z-index: 1;
@@ -297,8 +336,11 @@ p.welcome {
 
 iframe {
   position: absolute;
-  height: calc(100vh - 186px);
-  max-height: 500px;
+  height: calc(100vh - 245px);
+  /* max-height: 500px; */
+  top: 20px;
+  left: 0;
+  width: 100%;
 }
 
 #test-tag {
@@ -306,9 +348,9 @@ iframe {
   font-size: 2em;
   z-index: 9999;
   color: #e6e4e3;
-  right: 20px;
+  right: 10px;
   opacity: 0.5;
-  top: 10px;
+  top: 20px;
   text-transform: uppercase;
   text-shadow: -1px -1px 0 #343434, 1px -1px 0 #343434, -1px 1px 0 #343434, 1px 1px 0 #343434;
 }
@@ -316,7 +358,7 @@ iframe {
 .gtrace-label {
   position: absolute;
   color: #e6e4e3;
-  bottom: 10px;
+  bottom: 20px;
   padding: 5px 25px;
   background: #343434;
   border-radius: 10px;

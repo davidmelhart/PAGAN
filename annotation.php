@@ -296,8 +296,6 @@
         </div>
         <div id='cookie_wall'></div>";
     }
-
-    echo '<div class="participant_id">ID: '.$_COOKIE['user'].'<br>SESSION: '.$session_id.'</div>';
 ?>
 
 
@@ -307,13 +305,17 @@
             if ($test_mode > 0) {
                 echo "<div id=test-tag>test mode</div>";
             }
+        
+            echo '<div class="participant_id"><span>ID: '.$_COOKIE['user'].' | SESSION: '.$session_id.'</span>';
+                if($endless !== 'on') {
+                    echo '<span class=counter>video '.(string)($current_run['n_runs']+1).' out of '.(string)$n_of_participant_runs.'</span>';
+                }
+            echo '</div>';
         ?>
         <div id="tutorial">
             <div>
                 <?php
-                    if($endless !== 'on') {
-                        echo '<p class=counter>video '.(string)($current_run['n_runs']+1).' out of '.(string)$n_of_participant_runs.'</p>';
-                    }
+                    
                     if($started_project < 1){
                         echo '<p class="welcome">Welcome to '.$project_name.'!</p>';
                     }

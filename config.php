@@ -3,8 +3,8 @@
 server with default setting (user 'root' with no password) */
 define('DB_SERVER', 'localhost');
 define('DB_PORT', 3306);
-define('DB_NAME', 'pagan_test');
-define('DB_USERNAME', 'root');
+define('DB_NAME', 'PAGAN');
+define('DB_USERNAME', 'pagan_root');
 define('DB_PASSWORD', 'admin');
 
 /* Attempt to connect to MySQL database */

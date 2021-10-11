@@ -166,16 +166,21 @@ function onPlayerReady(event) {
     console.log('ready!')
     player.mute();
     // Workaround stuck buffering
-    setTimeout(function() {
+    let failSafe = setTimeout(function() {
         if (firstStart) {
+            console.warn("Failsafe startup triggered.")
             player.playVideo();
+            setTimeout(function() {
+                player.playVideo();
+            }, 1000);
         }
-    }, 3000);
+    }, 5000);
     player.addEventListener("onStateChange", function(){
         if(player.getPlayerState() == 1 && firstStart) {
             player.pauseVideo();
             player.removeEventListener();
             player.unMute();
+            clearTimeout(failSafe);
             showStart();
         }
     });
@@ -381,11 +386,14 @@ $(window).focus(function(e) {
 function animateRankTrace(){
     if (paused) {
         //Draw pause symbol and exit loop if the video is paused
+        context.fillStyle = "#4d4d4d";
+        context.fillRect(canvas.width - 35, 8, 25, 24);
         context.fillStyle = "#b1b1b3";
         context.fillRect(canvas.width - 20, 10, 8, 20);
         context.fillRect(canvas.width - 33, 10, 8, 20);
         return;
     }
+    canvas.width = $('#trace').width();
     // Output for the video length bar
     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
     // If video passed 99% of viewing time, register it as seen
@@ -595,11 +603,14 @@ function animateRankTrace(){
 function animateGtrace(){
     if (paused) {
         //Draw pause symbol and exit loop if the video is paused
+        context.fillStyle = "#4d4d4d";
+        context.fillRect(canvas.width - 35, 8, 25, 24);
         context.fillStyle = "#b1b1b3";
         context.fillRect(canvas.width - 20, 10, 8, 20);
         context.fillRect(canvas.width - 33, 10, 8, 20);
         return;
     }
+    canvas.width = $('#trace').width();
 
     // Output for the video length bar
     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
@@ -771,11 +782,14 @@ function animateGtrace(){
 function animateBinary(){
     if (paused) {
         //Draw pause symbol and exit loop if the video is paused
+        context.fillStyle = "#4d4d4d";
+        context.fillRect(canvas.width - 35, 8, 25, 24);
         context.fillStyle = "#b1b1b3";
         context.fillRect(canvas.width - 20, 10, 8, 20);
         context.fillRect(canvas.width - 33, 10, 8, 20);
         return;
     }
+    canvas.width = $('#trace').width();
     // Output for the video length bar
     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
     // If video passed 25% of viewing time, register it as seen
@@ -960,6 +974,8 @@ function startPause() {
             if (firstStart) {
                 firstStart = false;
                 $('#tutorial').css('opacity',0);
+                canvas.width = $('#trace').width();
+
                 if(sound == 'off') {
                     if (video_type == 'youtube' || video_type == 'user_youtube') {
                         player.mute();
@@ -1094,110 +1110,3 @@ function onMouseClickUpdate(e) {
     onMouseUpdate(e);
     last_click = true;
 }
-
-
-
-// function gradient(a, b) {
-//     return (b.y-a.y)/(b.x-a.x);
-// }
-
-// function bzCurve(ctx, points, f, t) {
-//     //f = 0, will be straight line
-//     //t suppose to be 1, but changing the value can control the smoothness too
-//     if (typeof(f) == 'undefined') f = 0.3;
-//     if (typeof(t) == 'undefined') t = 0.6;
-
-//     ctx.beginPath();
-//     ctx.moveTo(points[0].x, points[0].y);
-
-//     var m = 0;
-//     var dx1 = 0;
-//     var dy1 = 0;
-
-//     var preP = points[0];
-//     for (var i = 1; i < points.length; i++) {
-//         var curP = points[i];
-//         nexP = points[i + 1];
-//         if (nexP) {
-//             m = gradient(preP, nexP);
-//             dx2 = (nexP.x - curP.x) * -f;
-//             dy2 = dx2 * m * t;
-//         } else {
-//             dx2 = 0;
-//             dy2 = 0;
-//         }
-//         ctx.bezierCurveTo(preP.x - dx1, preP.y - dy1, curP.x + dx2, curP.y + dy2, curP.x, curP.y);
-//         dx1 = dx2;
-//         dy1 = dy2;
-//         preP = curP;
-//     }
-//     ctx.stroke();
-// }
-
-
-// function animateRankTrace(){
-//     if (paused) {
-//         //Draw pause symbol and exit loop if the video is paused
-//         context.fillStyle = "#b1b1b3";
-//         context.fillRect(canvas.width - 20, 10, 8, 20);
-//         context.fillRect(canvas.width - 33, 10, 8, 20);
-//         return;
-//     }
-//     // Output for the video length bar
-//     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
-//     // If video passed 99% of viewing time, register it as seen
-//     if(getCurrentTime()/getDuration() > 0.99 && seen_trigger == false) {
-//         seen_trigger = true;
-//         var seen;
-//         if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
-//             seen = video;
-//         } else {
-//             seen = "https://www.youtube.com/watch?v="+video;
-//         }
-//         $.post("util/reg_seen.php", {project_id: project_id, entry_id: entry_id});
-//         console.log("Video registered as 'seen'.");
-//     }
-//     // Automatically send new annotations values every ms while the animation loop is running
-//     currentTime = Math.round(getCurrentTime() * 1000); // Current time of the video in ms
-//     recordAnnotation(currentTime, 'unbounded');
-
-//     // Request new frame, clear canvas, and redraw background
-//     requestAnimationFrame(animateRankTrace);
-//     context.clearRect(0, 0, canvas.width, canvas.height);
-//     context.fillStyle = '#4d4d4d';
-//     context.fillRect(0, 0, canvas.width, canvas.height);
-
-//     // Calculate the normalised values for the annotaton trace for the current tick
-//     trace.push(annotatorValue);
-//     for (var j = 0; j < trace.length; j ++) {
-//         normTrace.push({
-//             x: normPosX(trace, j),
-//             y: normPosY(trace[j], annotatorMax, annotatorMin)
-//         });
-//     }
-
-//     // Sytle setup
-//     context.lineCap="round";
-//     context.strokeStyle = '#86a3c6';
-//     context.lineWidth = 4;
-//     context.beginPath();
-//     // Move to start position
-//     context.moveTo(normTrace[0].x, normTrace[0].y);
-//     // For every point, calculate the control point and draw quadratic curve
-//     for (var i = 1; i < normTrace.length - 2; i ++) {
-//         var xc = (normTrace[i].x + normTrace[i + 1].x) / 2;
-//         var yc = (normTrace[i].y + normTrace[i + 1].y) / 2;
-
-//         context.quadraticCurveTo(normTrace[i].x, normTrace[i].y, xc, yc);
-//     }
-//     // Curve to the last two segments
-//     if (i > 2) {
-//         context.quadraticCurveTo(normTrace[i].x, normTrace[i].y, normTrace[i+1].x, normTrace[i+1].y);
-//         context.stroke();
-//         // Annotation cursor
-//         context.beginPath();
-//         context.arc(normTrace[i+1].x, normTrace[i+1].y, 10, 0, 2 * Math.PI, false);
-//         context.stroke();
-//     }
-//     normTrace = [];
-// }
