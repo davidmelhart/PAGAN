@@ -19,6 +19,7 @@ var
     firstStart = true,                  //helper variable that tells the app the first startup
     ended = false,                      //helper variable that tells the app the video is started
     player,                             //variable holding the youtube player
+    aspect_ratio,                       //helper variable that tells the app the aspect ratio of the video
     seen_trigger = false,               //helper variable that tells the app the video has been registered as seen
     tolerance = 0.99,                   //controls how much of the annotation has to be completed to be registered as seen
     keyPress = false,                   //helper variable that tells the app if a key is pressed
@@ -79,7 +80,8 @@ function loadVideo(
     _gtrace_click,
     _tolerance,
     _gtrace_rate,
-    _test_mode
+    _test_mode,
+    _aspect_ratio
 	){
     name = _name;
     annotation_type = _annotation_type;
@@ -100,6 +102,14 @@ function loadVideo(
     gtrace_update = _gtrace_update == "on" ? true : false;
     tolerance = parseInt(_tolerance)/100;
     gtrace_rate = parseInt(_gtrace_rate);
+    aspect_ratio = _aspect_ratio;
+
+    // Set aspect ratio of video container
+    if (aspect_ratio.includes(':')){
+        aspect_ratio = aspect_ratio.split(':');
+        aspect_ratio = aspect_ratio[0]/aspect_ratio[1];
+        $('.inner').css('max-width', 'calc((100vh - 245px) * ' + aspect_ratio + ')');
+    }
 
     // Set label for the annotation
     console.log("Annotation target is set to " + target + ".");

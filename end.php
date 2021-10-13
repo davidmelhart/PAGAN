@@ -72,7 +72,8 @@ echo '<div class="participant_id">ID: '.$_COOKIE['user'].'<br>PAST SESSIONS:<br>
                 if (!empty($survey)){
                     if (!empty($autofill_id)){
                         $separator = '?';
-                        if (strpos(end(explode('/', $survey)), '?') !== false) {
+                        $survey_parts = explode('/', $survey);
+                        if (strpos(end($survey_parts), '?') !== false) {
                             $separator = '&';
                         }
 

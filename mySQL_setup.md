@@ -32,6 +32,7 @@ CREATE TABLE `projects` (
     `project_name` VARCHAR(100),
     `target` VARCHAR(30),
     `type` VARCHAR(10),
+    `aspect_ratio` VARCHAR(12),
     `source_type` VARCHAR(13),
     `video_loading` VARCHAR(8),
     `endless` VARCHAR(3),

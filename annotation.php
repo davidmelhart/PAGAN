@@ -74,7 +74,7 @@
     $started_project = 0;
 
     // Init globals
-    $project_name = $project_id = $entry_id = $target = $type = $source_type = $video_loading = $n_of_entries = $n_of_participant_runs = $source = $sequence_n = $endless = $sound = $message = $monochrome = $ranktrace_rate = $ranktrace_smooth = $gtrace_control = $gtrace_update = $gtrace_click = $tolerance = NULL;
+    $project_name = $project_id = $entry_id = $target = $type = $source_type = $video_loading = $n_of_entries = $n_of_participant_runs = $source = $sequence_n = $endless = $sound = $message = $monochrome = $ranktrace_rate = $ranktrace_smooth = $gtrace_control = $gtrace_update = $gtrace_click = $tolerance = $aspect_ratio = NULL;
 
     if($_SERVER["REQUEST_METHOD"] == "GET"){
         $project_id = htmlspecialchars($_GET['id'], ENT_QUOTES, "UTF-8");
@@ -93,6 +93,7 @@
                     $project_name = $row['project_name'];
                     $target = $row['target'];
                     $type = $row['type'];
+                    $aspect_ratio = $row['aspect_ratio'];
                     $source_type = $row['source_type'];
                     $video_loading = $row['video_loading'];
                     $endless = $row['endless'];
@@ -154,6 +155,7 @@
                 $project_name = $row['project_name'];
                 $target = $row['target'];
                 $type = $row['type'];
+                $aspect_ratio = $row['aspect_ratio'];
                 $source_type = $row['source_type'];
                 $video_loading = $row['video_loading'];
                 $endless = $row['endless'];
@@ -457,7 +459,8 @@
                 _gtrace_click = "'.$gtrace_click.'",
                 _tolerance = "'.$tolerance.'",
                 _gtrace_rate = "'.$gtrace_rate.'",
-                _test_mode = "'.$test_mode.'"
+                _test_mode = "'.$test_mode.'",
+                _aspect_ratio = "'.$aspect_ratio.'",
             );
         </script>
         ';

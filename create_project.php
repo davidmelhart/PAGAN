@@ -32,7 +32,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 }
 
 // Define variables and initialize with empty values
-$project_name = $target = $type = $source_type = $video_loading = $endless = $n_of_entries = $n_of_participant_runs = $n_of_participant_uploads = $sound = $upload_message = $start_message = $end_message = $survey_link = $autofill_id = $monochrome = $ranktrace_rate = $ranktrace_smooth = $gtrace_control = $gtrace_update = $gtrace_click = $gtrace_rate = $tolerance = "";
+$project_name = $target = $type = $aspect_ratio = $source_type = $video_loading = $endless = $n_of_entries = $n_of_participant_runs = $n_of_participant_uploads = $sound = $upload_message = $start_message = $end_message = $survey_link = $autofill_id = $monochrome = $ranktrace_rate = $ranktrace_smooth = $gtrace_control = $gtrace_update = $gtrace_click = $gtrace_rate = $tolerance = "";
 $project_name_err = $target_err = $source_url_err = "";
 
 // Grab username
@@ -112,6 +112,32 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             // Attempt to execute the prepared statement
             if($stmt->execute()){
                 $target = htmlspecialchars(trim($_POST["target"]));
+            } else{
+                echo "Oops! Something went wrong. Please try again later.";
+            }
+        }
+        // Close statement
+        unset($stmt);
+    }
+
+    // Validate aspect_ratio
+    if(empty(trim($_POST["aspect-ratio"]))){
+        $aspect_ratio = "full width";
+        $param_aspect_ratio = "full width";
+    } else{
+        // Prepare a select statement
+        $sql = "SELECT id FROM projects WHERE aspect_ratio = :aspect_ratio";
+
+        if($stmt = $pdo->prepare($sql)){
+            // Bind variables to the prepared statement as parameters
+            $stmt->bindParam(":aspect_ratio", $param_aspect_ratio, PDO::PARAM_STR);
+
+            // Set parameters
+            $param_aspect_ratio = htmlspecialchars(trim($_POST["aspect-ratio"]));
+
+            // Attempt to execute the prepared statement
+            if($stmt->execute()){
+                $aspect_ratio = htmlspecialchars(trim($_POST["aspect-ratio"]));
             } else{
                 echo "Oops! Something went wrong. Please try again later.";
             }
@@ -604,8 +630,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(empty($project_name_err) && empty($target_err) && empty($source_url_err)){
 
         // Prepare an insert statement
-        $sql = "INSERT INTO projects (username, project_id, project_name, target, type, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_link, autofill_id, archived, monochrome, ranktrace_smooth, ranktrace_rate, gtrace_control,  gtrace_update, gtrace_click, gtrace_rate, tolerance)
-        VALUES (:username, :project_id, :project_name, :target, :type, :source_type, :video_loading, :endless, :n_of_entries, :n_of_participant_runs, :sound, :upload_message, :start_message, :end_message, :survey_link, :autofill_id, :archived, :monochrome, :ranktrace_smooth, :ranktrace_rate, :gtrace_control, :gtrace_update, :gtrace_click, :gtrace_rate, :tolerance)";
+        $sql = "INSERT INTO projects (username, project_id, project_name, target, type, aspect_ratio, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_link, autofill_id, archived, monochrome, ranktrace_smooth, ranktrace_rate, gtrace_control,  gtrace_update, gtrace_click, gtrace_rate, tolerance)
+        VALUES (:username, :project_id, :project_name, :target, :type, :aspect_ratio, :source_type, :video_loading, :endless, :n_of_entries, :n_of_participant_runs, :sound, :upload_message, :start_message, :end_message, :survey_link, :autofill_id, :archived, :monochrome, :ranktrace_smooth, :ranktrace_rate, :gtrace_control, :gtrace_update, :gtrace_click, :gtrace_rate, :tolerance)";
 
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
@@ -614,6 +640,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $stmt->bindParam(":project_name", $param_project_name, PDO::PARAM_STR);
             $stmt->bindParam(":target", $param_target, PDO::PARAM_STR);
             $stmt->bindParam(":type", $param_type, PDO::PARAM_STR);
+            $stmt->bindParam(":aspect_ratio", $param_aspect_ratio, PDO::PARAM_STR);
             $stmt->bindParam(":source_type", $param_source_type, PDO::PARAM_STR);
             $stmt->bindParam(":video_loading", $param_video_loading, PDO::PARAM_STR);
             $stmt->bindParam(":endless", $param_endless, PDO::PARAM_STR);
@@ -642,6 +669,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_project_name = $project_name;
             $param_target = $target;
             $param_type = $type;
+            $param_aspect_ratio = $aspect_ratio;
             $param_source_type = $source_type;
             $param_video_loading = $video_loading;
             $param_endless = $endless;
@@ -793,7 +821,7 @@ include("header.php");
             <div class="form-group <?php echo (!empty($target_err)) ? 'has-error' : ''; ?>">
                 <label>Annotation Target</label>
                 <span class="help-block"><?php echo $target_err; ?></span>
-                <input placeholder="arousal" type="text" name="target" class="form-control" value="">
+                <input placeholder="arousal" type="text" name="target" class="form-control" value="<?php echo $target; ?>">
             </div>
             <div class="form-group" id="start-message">
                 <label>Optional Target Description</label>
@@ -832,7 +860,11 @@ include("header.php");
                 </div>
             </div>
             <div class="form-group">
-                <label>Project Source</label>
+                <label>Project Source</label>   
+                <div id="aspect-ratio">
+                    <div><span>Video Aspect Ratio</span> <input type="text" name="aspect-ratio" class="form-control" placeholder="e.g. full width, 4:3, 16:9, 21:9, ..." /></div>
+                    <i style="font-size: 0.7em">The default value is "full width".</i>
+                </div>
                 <span class="help-block"><?php echo $source_url_err; ?></span>
                 <div id="source-select">
                     <input type="radio" name="source_type" value="youtube" checked> <span>YouTube</span>

@@ -83,13 +83,23 @@ input.form-control[type=range] {
   width: 90%;
 }
 
-#source-select {
+#source-select,
+#aspect-ratio {
   background: #444444;
   color: #e6e4e3;
   border: 2px solid #343434;
   border-bottom: none;
   border-top: none;
   padding: 5px 0;
+}
+
+#aspect-ratio {
+  border-bottom: 2px solid #343434;
+}
+
+#aspect-ratio input {
+  border: none;
+  border-radius: 0;
 }
 
 #type-select, #loading, #participant-runs, #sound, #tolerance {

@@ -10,6 +10,7 @@ p.welcome {
 .inner {
   align-items: flex-start;
   padding-top: 20px;
+  margin: auto;
 }
 
 .participant_id {
