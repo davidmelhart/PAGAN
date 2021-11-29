@@ -70,6 +70,7 @@ CREATE TABLE projects (
     project_name VARCHAR(100),
     target VARCHAR(30),
     type VARCHAR(10),
+    aspect_ratio VARCHAR(12),
     source_type VARCHAR(13),
     video_loading VARCHAR(8),
     endless VARCHAR(3),
@@ -78,10 +79,10 @@ CREATE TABLE projects (
     end_message VARCHAR(255),
     survey_link VARCHAR(255),
     sound VARCHAR(3),
-  start_message VARCHAR(255),
-  archived VARCHAR(5),
-  upload_message VARCHAR(500),
-  autofill_id VARCHAR(11),
+    start_message VARCHAR(255),
+    archived VARCHAR(5),
+    upload_message VARCHAR(500),
+    autofill_id VARCHAR(11),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
