@@ -35,9 +35,6 @@ $endless = "on";
 $n_of_entries = 1;
 $n_of_participant_runs = 1;
 
-// Grab username
-$username = $_SESSION["username"];
-
 // Variables for file upload
 $file_path = "";
 

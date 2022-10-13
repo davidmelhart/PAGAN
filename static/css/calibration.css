@@ -1,0 +1,74 @@
+.calibration-container {
+	position: absolute;
+    z-index: 999;
+    top: 20px;
+    width: 100%;
+    height: calc(100vh - 245px);
+    outline: 1px solid red;
+}
+
+[id^="calibration-point-"]{
+	position: absolute;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    border: none;
+}
+
+[id^="calibration-point-"]:hover{
+	cursor: pointer;
+}
+
+[id^="calibration-point-"]:active{
+	background: #86a3c5;
+}
+
+#calibration-point-1 {
+	top: 10px;
+	left: 10px;
+}
+
+#calibration-point-2 {
+	top: 10px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+#calibration-point-3 {
+	top: 10px;
+	right: 10px;
+}
+
+#calibration-point-4 {
+	top: 50%;
+	transform: translateY(-50%);
+	right: 10px;
+}
+
+#calibration-point-5 {
+	bottom: 10px;
+	right: 10px;
+}
+
+#calibration-point-6 {
+	bottom: 10px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+#calibration-point-7 {
+	bottom: 10px;
+	left: 10px;
+}
+
+#calibration-point-8 {
+	top: 50%;
+	left: 10px;
+	transform: translateY(-50%);
+}
+
+#calibration-point-9 {
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}

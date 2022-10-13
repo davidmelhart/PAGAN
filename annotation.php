@@ -55,7 +55,7 @@
     }
 
     $title = 'Platform for Affective Game ANnotation';
-    $css = ['annotation.css'];
+    $css = ['annotation.css', 'calibration.css'];
     $test_mode = 0;
     if (!empty($_GET['test_mode'])){
         $test_mode = 1;
@@ -314,6 +314,17 @@
                 }
             echo '</div>';
         ?>
+        <div class="calibration-container">
+            <input type="button" class="calibration" id="calibration-point-1"></input>
+            <input type="button" class="calibration" id="calibration-point-2"></input>
+            <input type="button" class="calibration" id="calibration-point-3"></input>
+            <input type="button" class="calibration" id="calibration-point-4"></input>
+            <input type="button" class="calibration" id="calibration-point-5"></input>
+            <input type="button" class="calibration" id="calibration-point-6"></input>
+            <input type="button" class="calibration" id="calibration-point-7"></input>
+            <input type="button" class="calibration" id="calibration-point-8"></input>
+            <input type="button" class="calibration" id="calibration-point-9"></input>
+        </div>
         <div id="tutorial">
             <div>
                 <?php
@@ -424,7 +435,7 @@
 </div>
 
 <?php
-    $scripts = ['cookie_notice.js', 'annotation.js'];
+    $scripts = ['cookie_notice.js', 'annotation.js', 'vendor/webgazer.js', 'eye_tracking.js'];
     include("scripts.php");
     $video = "";
     if($source_type == 'youtube' || $source_type == 'user_youtube'){
