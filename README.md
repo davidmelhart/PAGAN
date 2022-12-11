@@ -83,6 +83,14 @@ CREATE TABLE projects (
     archived VARCHAR(5),
     upload_message VARCHAR(500),
     autofill_id VARCHAR(11),
+	  monochrome VARCHAR(3),
+	  ranktrace_smooth VARCHAR(3),
+	  ranktrace_rate VARCHAR(5),
+	  gtrace_control VARCHAR(10),
+	  gtrace_update VARCHAR(3),
+	  gtrace_click VARCHAR(3),
+	  gtrace_rate INT,
+	  tolerance INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id)
 );
