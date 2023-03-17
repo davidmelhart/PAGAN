@@ -455,7 +455,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_n_of_entries = count($_FILES["file"]['name']);
         } elseif ($source_type == "youtube" || $source_type == "ftp") {
             $source_urls = explode("\n", $_POST["source_url"]);
-            $param_n_of_entries = count(source_urls);
+            $param_n_of_entries = count($source_urls);
         } elseif ($source_type == "user_upload" || $source_type == "user_youtube") {
             $param_n_of_entries = htmlspecialchars(trim($_POST['n_of_participant_uploads']));
         }
@@ -682,7 +682,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(empty($project_name_err) && empty($target_err) && empty($source_url_err)){
 
         // Prepare an insert statement
-        $sql = "INSERT INTO projects (username, project_id, project_name, target, type, aspect_ratio, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_link, autofill_id, archived, monochrome, ranktrace_smooth, ranktrace_rate, gtrace_control,  gtrace_update, gtrace_click, gtrace_rate, tolerance)
+        $sql = "INSERT INTO projects (username, project_id, project_name, target, type, aspect_ratio, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_label, survey_link, autofill_id, autofill_key, archived, monochrome, ranktrace_smooth, ranktrace_rate, gtrace_control, gtrace_update, gtrace_click, gtrace_rate, tolerance)
         VALUES (:username, :project_id, :project_name, :target, :type, :aspect_ratio, :source_type, :video_loading, :endless, :n_of_entries, :n_of_participant_runs, :sound, :upload_message, :start_message, :end_message, :survey_label, :survey_link, :autofill_id, :autofill_key, :archived, :monochrome, :ranktrace_smooth, :ranktrace_rate, :gtrace_control, :gtrace_update, :gtrace_click, :gtrace_rate, :tolerance)";
 
         if($stmt = $pdo->prepare($sql)){
@@ -707,7 +707,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $stmt->bindParam(":autofill_id", $param_autofill_id, PDO::PARAM_STR);
             $stmt->bindParam(":autofill_key", $param_autofill_key, PDO::PARAM_STR);
             $stmt->bindParam(":archived", $param_archived, PDO::PARAM_STR);
-
             $stmt->bindParam(":monochrome", $param_monochrome, PDO::PARAM_STR);
             $stmt->bindParam(":ranktrace_smooth", $param_ranktrace_smooth, PDO::PARAM_STR);
             $stmt->bindParam(":ranktrace_rate", $param_ranktrace_rate, PDO::PARAM_STR);
@@ -738,7 +737,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_autofill_id = $autofill_id;
             $param_autofill_key = $autofill_key;
             $param_archived = "false";
-
             $param_monochrome = $monochrome;
             $param_ranktrace_smooth = $ranktrace_smooth;
             $param_ranktrace_rate = $ranktrace_rate;
@@ -931,6 +929,10 @@ include("header.php");
             <div class="form-group">
                 <label>Project Source</label>
                 <span class="help-block"><?php echo $source_url_err; ?></span>
+                <div id="aspect-ratio">
+                    <div><span>Video Aspect Ratio</span> <input type="text" name="aspect-ratio" class="form-control" placeholder="e.g. full width, 4:3, 16:9, 21:9, ..." /></div>
+                    <i style="font-size: 0.7em">The default value is "full width".</i>
+                </div>
                 <div id="source-select">
                     <input type="radio" name="source_type" value="youtube" checked> <span>YouTube</span>
 
@@ -956,7 +958,6 @@ include("header.php");
                             echo '<input type="file" multiple name="file[]" class="form-control hidden" id="file-source" accept="video/mp4,video/avi,video/webm,video/mpeg,video/mov" value="">';
                         }
                     ?>
-                    <!-- <input type="text" name="source_url[]" class="form-control youtube-source" value=""> -->
                     <textarea class="form-control youtube-source" placeholder="One entry per row." rows="5" cols="46" name="source_url" wrap="soft" style="resize:vertical;"></textarea>
                 </div>
             </div>
