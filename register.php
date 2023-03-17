@@ -9,8 +9,6 @@
       $_COOKIE['user'] = $id;
   }
 
-  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
-
   // Generates GUID for username
   function getGUID(){
       mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
@@ -148,35 +146,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Validate secret
     if(empty(trim($_POST["secret"]))){
         $secret_err = "Please enter your registration key.";
-    } else{
-        // Prepare a select statement
-        $sql = "SELECT id FROM reg_keys WHERE secret = :secret";
-
-        if($stmt = $pdo->prepare($sql)){
-            // Bind variables to the prepared statement as parameters
-            $stmt->bindParam(":secret", $param_secret, PDO::PARAM_STR);
-
-            // Set parameters
-            $param_secret = trim($_POST["secret"]);
-
-            // Attempt to execute the prepared statement
-            if($stmt->execute()){
-                if($stmt->rowCount() == 1){
-                    $row = $stmt->fetch();
-                    $key_id = $row['id'];
-                    // $del = $pdo->prepare("DELETE FROM reg_keys WHERE id = :id");
-                    // $del->bindParam(":id", $key_id, PDO::PARAM_STR);
-                    // $del->execute();
-                } else{
-                    $secret_err = "Registration key does not exist.";
-                }
-            } else{
-                echo "Oops! Something went wrong. Please try again later.";
-            }
-        }
-
-        // Close statement
-        unset($stmt);
     }
 
     // Check input errors before inserting in database
@@ -200,6 +169,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
             // Attempt to execute the prepared statement
             if($stmt->execute()){
+                // Redirect to login page
                 // Prepare a select statement
                 $sql2 = "SELECT id FROM reg_keys WHERE secret = :secret";
 
@@ -225,11 +195,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         echo "Oops! Something went wrong. Please try again later.";
                     }
                 }
-
                 // Close statement
                 unset($stmt2);
 
-                // Redirect to login page
                 header("location: login.php");
             } else{
                 echo "Something went wrong. Please try again later.";

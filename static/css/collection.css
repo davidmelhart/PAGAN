@@ -1,0 +1,51 @@
+.inner {
+	text-align: center;
+	display: block;
+	min-height: 0;
+}
+
+.button.inactive {
+    background: #888888;
+    color: #e6e4e3;
+    border-color: #888888;
+    text-decoration: line-through;
+}
+
+.button.inactive:hover {
+    background: #888888;
+    color: #e6e4e3;
+}
+
+.collection-img-container {
+	display: flex;
+	justify-content: center;
+}
+
+.collection-img {
+    position: relative;
+    margin: 0 10px;
+}
+
+.collection-img img {
+    background: #343434;
+    width: 320px;
+    height: 160px;
+    border: solid 2px #343434;
+    border-radius: 10px;
+}
+
+.collection-img span {
+    position: absolute;
+    color: #e6e4e3;
+    font-size: 0.7em;
+    background: #343434;
+    padding: 5px;
+    border-top-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+    bottom: 0;
+    right: 0;
+}
+
+.scroll-full {
+	margin-bottom: -17px;
+}

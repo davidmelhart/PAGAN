@@ -9,7 +9,6 @@
       $_COOKIE['user'] = $id;
   }
 
-  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
 
   // Generates GUID for username
   function getGUID(){

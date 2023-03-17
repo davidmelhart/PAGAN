@@ -9,8 +9,6 @@
       $_COOKIE['user'] = $id;
   }
 
-  $current_page = explode(".", $_SERVER['REQUEST_URI'])[0];
-
   // Generates GUID for username
   function getGUID(){
       mt_srand((double)microtime()*10000);//optional for php 4.2.0 and up.
@@ -51,9 +49,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $type = $_POST["type"];
     $sound = $_POST["video_sound"];
     $source_url = $_POST["source_url"];
-    $source_url = explode("v=", $source_url)[1];
-    header("location: annotation.php?id=".$project_id."&test_mode=true&title=".$project_name."&target=".$target."&type=".$type."&sound=".$sound."&source_type=".$source_type."&source=".$source_url."&video_loading=".$video_loading);
-    exit();
+    if (!empty($project_name) && !empty($type) && !empty($sound) && !empty($source_url)) {
+        $source_url = explode("v=", $source_url)[1];
+        if (!empty($target)){
+            $target = "arousal";
+        }
+        header("location: annotation.php?id=".$project_id."&test_mode=true&title=".$project_name."&target=".$target."&type=".$type."&sound=".$sound."&source_type=".$source_type."&source=".$source_url."&video_loading=".$video_loading);
+        exit();
+    }
 }
 include("header.php");
 ?>

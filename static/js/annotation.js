@@ -1,5 +1,5 @@
 // Global variables
-var 
+var
     video_container = $('video')[0],    //video container
     canvas = $('canvas')[0],            //canvas for the annotator app
     context = canvas.getContext('2d'),  //context of the drawing board
@@ -20,15 +20,26 @@ var
     ended = false,                      //helper variable that tells the app the video is started
     player,                             //variable holding the youtube player
     seen_trigger = false,               //helper variable that tells the app the video has been registered as seen
+    tolerance = 0.99,                   //controls how much of the annotation has to be completed to be registered as seen
     keyPress = false,                   //helper variable that tells the app if a key is pressed
     end_trigger = false,                //helper variable that tells the app if the end section is triggered
     storedTime = 0,                     //helper variable that stores last checked time for Gtrace
     storedValue = 0,                    //helper variable that stores last checked value for Gtrace
     annotationMod = 1,                  //variable controlling the step in values during the annotation
     mod = 0                             //modulator in the annotationMod exponential function
+    monochrome = false                  //sets the colour of annotation graphs
+    ranktrace_smooth = true             //controls the smoothing of the RankTrace curve
+    ranktrace_rate = 15                 //controls the rate of update of the RankTrace graph (30 is roughly one new point per second at 30 FPS)
+    last_click = false                  //helper variable that tells the app that a mousedown event occured
+    gtrace_control = "mouse"            //controls the input type of gtrace ("keyboard" or "mouse")
+    gtrace_click = true                 //controls whether gtrace takes mouse-click as an input
+    gtrace_update = true                //controls whether gtrace records a continuous stream of values
+    gtrace_rate = 1000					//controls the rate of update for the GTrace annotator
 ;
 
-var 
+let RANKTRACE_DEBUG = false;
+
+var
     annotation_type,
     renderer,
     video,
@@ -49,24 +60,55 @@ var test_mode_cache = {'Timestamp': [], 'VideoTime': [], 'Value': []};
 // target is the annotation target
 // custom user is set when a user is initated the application from the upload page
     // custom user is used to recreate the log's filename and pass it to the endplate url
-function loadVideo(_annotation_type_, _video_type_, _video_src_, _videoname_, _target_, _project_id_, _entry_id_, _session_id_, _name_, _sound_, _test_mode_){
-    name = _name_;
-    annotation_type = _annotation_type_;
-    video_type = _video_type_
-    video = _video_src_;
-    videoname = _videoname_;
-    target = _target_;
-    project_id = _project_id_;
-    entry_id = _entry_id_;
-    session_id = _session_id_;
-    sound = _sound_;
-    test_mode = _test_mode_;
+function loadVideo(
+	_annotation_type,
+    _video_type,
+    _video,
+    _videoname,
+    _target,
+    _project_id,
+    _entry_id,
+    _session_id,
+    _name,
+    _sound,
+    _monochrome,
+    _ranktrace_smooth,
+    _ranktrace_rate,
+    _gtrace_control,
+    _gtrace_update,
+    _gtrace_click,
+    _tolerance,
+    _gtrace_rate,
+    _test_mode
+	){
+    name = _name;
+    annotation_type = _annotation_type;
+    video_type = _video_type;
+    video = _video;
+    videoname = _videoname;
+    target = _target;
+    project_id = _project_id;
+    entry_id = _entry_id;
+    session_id = _session_id;
+    sound = _sound;
+    test_mode = _test_mode == "1" ? true : false;
+    monochrome = _monochrome == "on" ? true : false;
+    ranktrace_rate = _ranktrace_rate == "" ? 15 : Math.ceil(parseFloat(_ranktrace_rate));
+    ranktrace_smooth = _ranktrace_smooth == "on" ? true : false;
+    gtrace_control = _gtrace_control == "" ? "keyboard" : gtrace_control;
+    gtrace_click = _gtrace_click == "on" ? true : false;
+    gtrace_update = _gtrace_update == "on" ? true : false;
+    tolerance = _tolerance == "" ? 0.5 : parseInt(_tolerance)/100;
+    gtrace_rate = _gtrace_rate == "" ? 1000 : parseInt(_gtrace_rate);
 
     // Set label for the annotation
     console.log("Annotation target is set to " + target + ".");
+    if (test_mode) {
+        console.log("TEST MODE");
+    }
 
     // Load video if the source is file upload
-    if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+    if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
         console.log("Loading...")
         var source = document.createElement('source');
         source.setAttribute('src', video);
@@ -80,7 +122,7 @@ function loadVideo(_annotation_type_, _video_type_, _video_src_, _videoname_, _t
         // Stop annotator when the video finished and load the end page
         $('video').on('ended',function(){
             initEndSession();
-        }); 
+        });
     }
 
     // Load youtube API if YouTube video is the source
@@ -108,7 +150,7 @@ function onYouTubeIframeAPIReady() {
             'fs': 0,
             'modestbranding': 1,
             'host': 'https://www.youtube.com',
-            'origin': 'http://pagan.davidmelhart.com',
+            'origin': new URL(window.location.href).origin,
             'playsinline': 1,
             'rel': 0
         },
@@ -121,7 +163,14 @@ function onYouTubeIframeAPIReady() {
 
 // The video autoloads to start buffering. On Ready the app pauses the video and gives control to the user.
 function onPlayerReady(event) {
+    console.log('ready!')
     player.mute();
+    // Workaround stuck buffering
+    setTimeout(function() {
+        if (firstStart) {
+            player.playVideo();
+        }
+    }, 3000);
     player.addEventListener("onStateChange", function(){
         if(player.getPlayerState() == 1 && firstStart) {
             player.pauseVideo();
@@ -163,13 +212,27 @@ function showStart() {
 }
 
 function initEndSession(){
-    if (test_mode != 1) {
+    if (!test_mode) {
         end_trigger = true;
         $('#ended').removeClass('hidden');
         $('#video-shade').removeClass('hidden');
         context.fillStyle = "#b1b1b3";
         context.fillRect(canvas.width - 33, 10, 21, 20);
         paused = true;
+
+        // Register video as seen if it fell through the previous check
+        if(seen_trigger == false) {
+            seen_trigger = true;
+            var seen;
+            if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
+                seen = video;
+            } else {
+                seen = "https://www.youtube.com/watch?v="+video;
+            }
+            $.post("util/reg_seen.php", {project_id: project_id, entry_id: entry_id});
+            console.log("Video registered as 'seen'.");
+        }
+
         // Make sure all packages have been recieved
         // This is to make sure that the log is closed and can be downloaded after the redirect
         // If a custom user was passed to the application, generate filename for the log
@@ -222,7 +285,7 @@ function endSession() {
             // If the annotator played a game before, load up the play interface instead
             location.href='play.php?id='+project_id;
         }
-        
+
     }
 }
 
@@ -288,7 +351,7 @@ $(".help").click(function(){
     if (video_type == 'youtube' || video_type == 'user_youtube') {
         player.pauseVideo();
     }
-    video_container.pause();    
+    video_container.pause();
     paused = true;
     $('#pause').removeClass('hidden');
     $('#video-shade').removeClass('hidden');
@@ -297,7 +360,7 @@ $(window).blur(function(e) {
     if (video_type == 'youtube' || video_type == 'user_youtube') {
         player.pauseVideo();
     }
-    video_container.pause();    
+    video_container.pause();
     paused = true;
     $('#pause').removeClass('hidden');
     $('#video-shade').removeClass('hidden');
@@ -306,7 +369,7 @@ $(window).focus(function(e) {
     if (video_type == 'youtube' || video_type == 'user_youtube') {
         player.pauseVideo();
     }
-    video_container.pause();    
+    video_container.pause();
     paused = true;
     $('#pause').removeClass('hidden');
     $('#video-shade').removeClass('hidden');
@@ -324,12 +387,12 @@ function animateRankTrace(){
         return;
     }
     // Output for the video length bar
-    $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');    
+    $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
     // If video passed 99% of viewing time, register it as seen
-    if(getCurrentTime()/getDuration() > 0.99 && seen_trigger == false) {
+    if(getCurrentTime()/getDuration() > tolerance && seen_trigger == false) {
         seen_trigger = true;
         var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+        if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
             seen = video;
         } else {
             seen = "https://www.youtube.com/watch?v="+video;
@@ -356,141 +419,175 @@ function animateRankTrace(){
         });
     }
 
-    // if (keyPress) {
-    //     annotationMod = annotationMod + (Math.pow(2, mod)-1);
-    //     mod += 0.01;
-    // } else {
-    //     annotationMod = 1;
-    //     mod = 0;
-    // }
-
     // Sytle setup
     context.lineCap="round";
     context.strokeStyle = '#86a3c6';
-    context.lineWidth = 4;
+    context.lineWidth = 6;
     context.beginPath();
     // Move to start position
     context.moveTo(normTrace[0].x, normTrace[0].y);
-    // For every point, calculate the control point and draw quadratic curve
-    for (var i = 1; i < normTrace.length - 2; i ++) {
-        var xc = (normTrace[i].x + normTrace[i + 1].x) / 2;
-        var yc = (normTrace[i].y + normTrace[i + 1].y) / 2;
-        context.quadraticCurveTo(normTrace[i].x, normTrace[i].y, xc, yc);
-    }
-    // Curve to the last two segments
-    if (i > 2) {
-        context.quadraticCurveTo(normTrace[i].x, normTrace[i].y, normTrace[i+1].x, normTrace[i+1].y);
-        context.stroke();
-        // Annotation cursor
-        context.beginPath();
-        context.arc(normTrace[i+1].x, normTrace[i+1].y, 10, 0, 2 * Math.PI, false);
-        context.stroke();
-    }
-    normTrace = [];
-}
 
-// Animation loop for the canvas element when running New RankTrace style
-// Sends packages to the server with annotator values
-var nextGraphNode = 0;
-var graphUpdatePeriod = 100;
-var lastModifier = 0;
-var maxTrace = 5;
-var minTrace = -5;
-function animateRankTraceNew(){
-    if (paused) {
-        //Draw pause symbol and exit loop if the video is paused
-        context.fillStyle = "#b1b1b3";
-        context.fillRect(canvas.width - 20, 10, 8, 20);
-        context.fillRect(canvas.width - 33, 10, 8, 20);
-        return;
-    }
-    // Output for the video length bar
-    $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
-    // If video passed 25% of viewing time, register it as seen
-    if(getCurrentTime()/getDuration() > 0.25 && seen_trigger == false) {
-        seen_trigger = true;
-        var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
-            seen = video;
-        } else {
-            seen = "https://www.youtube.com/watch?v="+video;
+    // Smooth curve for display
+    function resample(arr, len) {
+        let chunks_x = [];
+        let copy_x = [...arr.map(i => i.x)];
+        while(copy_x.length > len) {
+            let slice_x = copy_x.splice(0, len)
+            chunks_x.push(slice_x.reduce((a, b) => (a + b)) / slice_x.length);
         }
-        $.post("util/reg_seen.php", {project_id: project_id, entry_id: entry_id});
-        console.log("Video registered as 'seen'.");
+
+        let chunks_y = [];
+        let copy_y = [...arr.map(i => i.y)];
+        while(copy_y.length > len) {
+            let slice_y = copy_y.splice(0, len)
+            chunks_y.push(slice_y.reduce((a, b) => (a + b)) / slice_y.length);
+        }
+
+        return chunks_x.map(function(e, i) {
+          return {'x': e, 'y': chunks_y[i]};
+        });
     }
 
-    // Automatically send new annotations values every ms while the animation loop is running
-    currentTime = Math.round(getCurrentTime() * 1000); // Current time of the video in ms
-    recordAnnotation(currentTime, 'unbounded');
+    smoothTrace = [normTrace[0]];
+    smoothTrace = smoothTrace.concat(resample(normTrace, ranktrace_rate));
 
-    // Request new frame, clear canvas, and redraw background
-    requestAnimationFrame(animateRankTraceNew);
-
-
-    if (new Date().getTime() > nextGraphNode) {
-        nextGraphNode = new Date().getTime() + graphUpdatePeriod;
-
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        context.fillStyle = '#4d4d4d';
-        context.fillRect(0, 0, canvas.width, canvas.height);
-
-        trace.push({x:getCurrentTime()/getDuration(), 
-                    y: annotatorValue});
-
-        normTrace = [];
-        
-        for (var i = 0; i < trace.length; i++) {
-            var normX = (trace[i].x * (canvas.width - 40)) + 20;
-            var normY;
-            if (annotatorValue > maxTrace) {
-                normY = ((canvas.height/2) - ((trace[i].y-(annotatorValue-5)) * ((canvas.height-40)/10)));
-                lastModifier = (annotatorValue-5);
-                maxTrace = annotatorValue;
-                minTrace = annotatorValue-10;
-            } else if (annotatorValue < minTrace) {
-                normY = (canvas.height/2) - ((trace[i].y-(annotatorValue+5)) * ((canvas.height-40)/10));
-                lastModifier = (annotatorValue+5);
-                minTrace = annotatorValue;
-                maxTrace = annotatorValue+10;
+    // Hot-Cold colour update
+    var grad = context.createLinearGradient(smoothTrace[0].x, 0, smoothTrace[smoothTrace.length-1].x, 0);
+    grad.addColorStop(0, "rgba(77, 77, 77, 0)");
+    let down_trend = 0;
+    let up_trend = 0;
+    let last_chage = 0;
+    let color = "#b2b2b2";
+    if (!monochrome){
+        grad.addColorStop(smoothTrace[0].x/smoothTrace[smoothTrace.length-1].x, "#b2b2b2");
+        for (let i = 2; i < smoothTrace.length; i++) {
+            let prev_point = smoothTrace[i-1];
+            let this_point = smoothTrace[i];
+            let position = this_point.x/smoothTrace[smoothTrace.length-1].x;
+            position = position > 0.01 ? position - 0.01 : position;
+            let change = prev_point.y - this_point.y;
+            if (change > 0){
+                if (last_chage == 0){
+                    up_trend += 20;
+                }
+                last_chage = 1;
+                up_trend +=15;
+                rgb = hsl2rgb(360, up_trend, 65);
+                color = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +', 1)';
+            } else if (change < 0){
+                if (last_chage == 0){
+                    down_trend += 20;
+                }
+                last_chage = -1;
+                down_trend +=15;
+                rgb = hsl2rgb(213, 20+down_trend, 65);
+                color = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +', 1)';
             } else {
-                normY = (canvas.height/2) - ((trace[i].y-lastModifier) * ((canvas.height-40)/10));
+                up_trend -= 10;
+                down_trend -= 10;
+                up_trend = up_trend < 0 ? 0 : up_trend;
+                down_trend = down_trend < 0 ? 0 : down_trend;
+                up_trend = up_trend > 100 ? 100 : up_trend;
+                down_trend = down_trend > 100 ? 100 : down_trend;
+                if(last_chage == 1){
+                    rgb = hsl2rgb(360, up_trend, 65);
+                    color = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +', 1)';
+                } else if(last_chage == -1){
+                    rgb = hsl2rgb(213, down_trend, 65);
+                    color = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +', 1)';
+                }
+                if (up_trend == 0 && down_trend == 0){
+                    last_chage = 0;
+                    color = "#b2b2b2";
+                }
             }
-            normTrace.push({
-                x: normX,
-                y: normY
-            });
+            grad.addColorStop(position, color);
+        }
+    } else {
+        color = '#86a3c6';
+        grad.addColorStop(smoothTrace[0].x/smoothTrace[smoothTrace.length-1].x, color);
+    }
+
+    context.strokeStyle = grad;
+
+    // For every point, calculate the control point and draw quadratic curve
+    // Curve goes through the middle points between registered annotations to get a smooth curve
+    if (ranktrace_smooth) {
+        let xc;
+        let yc;
+        for (let i = 1; i < smoothTrace.length - 1; i ++) {
+
+            xc = (smoothTrace[i].x + smoothTrace[i + 1].x) / 2;
+            yc = (smoothTrace[i].y + smoothTrace[i + 1].y) / 2;
+
+
+           context.quadraticCurveTo(smoothTrace[i].x, smoothTrace[i].y, xc, yc);
         }
 
+        context.moveTo(xc, yc);
+
+        xc = (smoothTrace[smoothTrace.length-1].x + normTrace[normTrace.length-1].x) / 2;
+        yc = (smoothTrace[smoothTrace.length-1].y + normTrace[normTrace.length-1].y) / 2;
+
+        context.quadraticCurveTo(smoothTrace[smoothTrace.length-1].x, smoothTrace[smoothTrace.length-1].y, xc, yc);
+    } else {
+        for (let i = 0; i < smoothTrace.length; i ++) {
+            context.lineTo(smoothTrace[i].x, smoothTrace[i].y);
+        }
+    }
+
+    context.lineTo(normTrace[normTrace.length-1].x, normTrace[normTrace.length-1].y);
+    context.stroke();
+    context.beginPath();
+    context.strokeStyle = color;
+    context.arc(normTrace[normTrace.length-1].x, normTrace[normTrace.length-1].y, 10, 0, 2 * Math.PI, false);
+    context.stroke();
+
+    // ===============================
+    if (RANKTRACE_DEBUG) {
         // Sytle setup
-        context.lineCap = "round";
-        context.strokeStyle = '#86a3c6';
-        context.lineWidth = 4;
-
-        // Move to start position
-        // context.moveTo(normTrace[0].x, normTrace[0].y);
-        // context.beginPath();
-        // for (var i = 0; i < normTrace.length; i++) {
-        //     context.lineTo(normTrace[i].x, normTrace[i].y);
-        //     context.stroke();
-        // }
-
-        // Smoothing
-        // if (normTrace.length > 5) {
-        //     lastElements = normTrace.slice(Math.max(normTrace.length - 5, 0));
-        //     firstElements = normTrace.slice(0, normTrace.length-5);
-        //     firstElements = firstElements.filter(function(value, index, Arr) {
-        //         return index % 5 == 0;
-        //     });
-        //     normTrace = firstElements.concat(lastElements);
-        // }
-
-        bzCurve(context, normTrace, 1, 0);
-
-        // Annotation cursor
+        context.lineCap="round";
+        context.strokeStyle = 'black';
+        context.lineWidth = 2;
         context.beginPath();
+        // Move to start position
+        context.moveTo(normTrace[0].x, normTrace[0].y);
+
+        smoothTrace = [normTrace[0]];
+        smoothTrace = smoothTrace.concat(resample(normTrace, 1));
+
+        // Hot-Cold colour update
+        var grad = context.createLinearGradient(smoothTrace[0].x, 0, smoothTrace[smoothTrace.length-1].x, 0);
+        grad.addColorStop(0, "rgba(77, 77, 77, 0)");
+        color = 'black';
+        grad.addColorStop(smoothTrace[0].x/smoothTrace[smoothTrace.length-1].x, color);
+
+        context.strokeStyle = grad;
+
+        // For every point, calculate the control point and draw quadratic curve
+        // Curve goes through the middle points between registered annotations to get a smooth curve
+        for (let i = 1; i < smoothTrace.length - 1; i ++) {
+
+            xc = (smoothTrace[i].x + smoothTrace[i + 1].x) / 2;
+            yc = (smoothTrace[i].y + smoothTrace[i + 1].y) / 2;
+
+            context.quadraticCurveTo(smoothTrace[i].x, smoothTrace[i].y, xc, yc);
+        }
+        context.moveTo(xc, yc);
+
+        xc = (smoothTrace[smoothTrace.length-1].x + normTrace[normTrace.length-1].x) / 2;
+        yc = (smoothTrace[smoothTrace.length-1].y + normTrace[normTrace.length-1].y) / 2;
+
+        context.quadraticCurveTo(smoothTrace[smoothTrace.length-1].x, smoothTrace[smoothTrace.length-1].y, xc, yc);
+        context.lineTo(normTrace[normTrace.length-1].x, normTrace[normTrace.length-1].y);
+        context.stroke();
+        context.beginPath();
+        context.strokeStyle = color;
         context.arc(normTrace[normTrace.length-1].x, normTrace[normTrace.length-1].y, 10, 0, 2 * Math.PI, false);
         context.stroke();
     }
+    // =============================
+    normTrace = [];
 }
 
 // Animation loop for the canvas element when running Gtrace style
@@ -503,13 +600,14 @@ function animateGtrace(){
         context.fillRect(canvas.width - 33, 10, 8, 20);
         return;
     }
+
     // Output for the video length bar
     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
     // If video passed 25% of viewing time, register it as seen
-    if(getCurrentTime()/getDuration() > 0.25 && seen_trigger == false) {
+    if(getCurrentTime()/getDuration() > tolerance && seen_trigger == false) {
         seen_trigger = true;
         var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+        if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
             seen = video;
         } else {
             seen = "https://www.youtube.com/watch?v="+video;
@@ -528,23 +626,28 @@ function animateGtrace(){
 
     // Clamp annotator value
     annotatorValue = clamp(annotatorValue, -100, 100);
-    if ((currentTime > storedTime+1000) && !keyPress && storedValue != annotatorValue) {
-        recordAnnotation(currentTime, 'bounded');
-        trace.push({pos: xPos, 
-                    h: (annotatorValue + 100)/2,
-                    s: 85 * (Math.abs(annotatorValue)/100),
-                    l: 55 + (Math.abs(annotatorValue)/10), 
-                    t: Math.round(getCurrentTime() * 1000)});
-        storedTime = currentTime;
-        storedValue = annotatorValue;
-    }
 
-    if (keyPress) {
-        annotationMod = annotationMod + (Math.pow(2, mod)-1);
-        mod += 0.01;
+    if (gtrace_control == "mouse"){
+        let canvasWidth = canvas.getBoundingClientRect().width;
+        let canvasPadding = (window.innerWidth - canvasWidth + 80)/2;
+
+        mouseX = clamp(mouseX, canvasPadding, window.innerWidth-canvasPadding);
+        annotatorValue = (mouseX - canvasPadding)/((window.innerWidth-(2*canvasPadding)));
+
+        if (annotatorValue >= 0.5) {
+            annotatorValue = (annotatorValue - 0.5)/0.5;
+        } else {
+            annotatorValue = -1*(-1*(annotatorValue/0.5)+1);
+        }
+        annotatorValue *= 100;
     } else {
-        annotationMod = 1;
-        mod = 0;
+        if (keyPress) {
+            annotationMod = annotationMod + (Math.pow(2, mod)-1);
+            mod += 0.01;
+        } else {
+            annotationMod = 1;
+            mod = 0;
+        }
     }
 
     // Draws previous annotator cursor positions
@@ -555,9 +658,13 @@ function animateGtrace(){
         if (drawTime - trace[j].t < 100) {
             alpha = (drawTime - trace[j].t)/100;
         } else {
-            alpha = clamp(0.9 - ((drawTime - trace[j].t - 3000)/3000), 0, 1);
+            alpha = clamp(0.9 - ((drawTime - trace[j].t - (3*gtrace_rate))/3000), 0, 1);
         }
-        context.strokeStyle = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +','+alpha+')';
+        if (!monochrome){
+            context.strokeStyle = 'rgba('+ rgb[0] +','+ rgb[1] +','+ rgb[2] +','+alpha+')';
+        } else {
+            context.strokeStyle = 'rgba(134, 163, 198,'+alpha+')';
+        }
         context.lineWidth = 4;
         context.beginPath();
         context.arc(canvas.width/2 + trace[j].pos, canvas.height/2, 30*alpha, 0, 2 * Math.PI, false);
@@ -571,37 +678,92 @@ function animateGtrace(){
     hue = (annotatorValue + 100)/2;
     saturation = 85 * (Math.abs(annotatorValue)/100);
     lightness = 55 + (Math.abs(annotatorValue)/10);
-    context.strokeStyle = 'hsl('+ hue +','+ saturation +'%,'+ lightness +'%)';
+    if (!monochrome){
+        context.strokeStyle = 'hsl('+ hue +','+ saturation +'%,'+ lightness +'%)';
+    } else {
+        context.strokeStyle = '#86a3c6';
+    }
     context.lineWidth = 10;
     context.beginPath();
     xPos = (annotatorValue/100)*((canvas.width/2)-40);
     context.arc(canvas.width/2 + xPos, canvas.height/2, 20, 0, 2 * Math.PI, false);
     context.stroke();
 
+    if (gtrace_update){
+        if ((currentTime > storedTime+gtrace_rate) && !keyPress && storedValue != annotatorValue) {
+            recordAnnotation(currentTime, 'bounded');
+            trace.push({pos: xPos,
+                        h: (annotatorValue + 100)/2,
+                        s: 85 * (Math.abs(annotatorValue)/100),
+                        l: 55 + (Math.abs(annotatorValue)/10),
+                        t: Math.round(getCurrentTime() * 1000)});
+            storedTime = currentTime;
+            storedValue = annotatorValue;
+        }
+    }
+
+    if (gtrace_control == "mouse" && gtrace_click){
+        if (last_click) {
+            recordAnnotation(currentTime, 'bounded');
+            trace.push({pos: xPos,
+                        h: (annotatorValue + 100)/2,
+                        s: 85 * (Math.abs(annotatorValue)/100),
+                        l: 55 + (Math.abs(annotatorValue)/10),
+                        t: Math.round(getCurrentTime() * 1000)});
+            storedTime = currentTime;
+            storedValue = annotatorValue;
+        }
+    }
+
     // Draw bounds of the annotator over the cursor
+    let likertWidth = (canvas.width-80)/6;
     context.beginPath();
     context.lineWidth = 2;
-    context.fillStyle = 'hsl('+ 10 +','+ 55 +'%,'+ 53 +'%)';
-    context.fillRect(142, 0, 2, canvas.height);
-    context.fillStyle = 'hsl('+ 30 +','+ 55 +'%,'+ 53 +'%)';
-    context.fillRect(278, 0, 2, canvas.height);
-    context.fillStyle = 'hsl('+ 80 +','+ 55 +'%,'+ 53 +'%)';
-    context.fillRect(canvas.width-142, 0, 2, canvas.height);
-    context.fillStyle = 'hsl('+ 60 +','+ 55 +'%,'+ 53 +'%)';
-    context.fillRect(canvas.width-278, 0, 2, canvas.height);
-    context.fillStyle = context.strokeStyle = 'hsl('+ 50 +','+ 0 +'%,'+ 50 +'%)';
-    context.fillRect(canvas.width/2-1, 0, 2, canvas.height/2-34);
-    context.fillRect(canvas.width/2-1, canvas.height/2+34, 2, canvas.height/2-34);
-    context.arc(canvas.width/2, canvas.height/2, 34, 0, 2 * Math.PI, false);    
-    context.stroke();
-    context.beginPath();
-    context.strokeStyle = 'hsl('+ 0 +','+ 85 +'%,'+ 53 +'%)';
-    context.arc(40, canvas.height/2, 34, Math.PI/2, Math.PI + (Math.PI * 1) / 2, false);
-    context.stroke();
-    context.beginPath();
-    context.strokeStyle = 'hsl('+ 100 +','+ 85 +'%,'+ 53 +'%)';
-    context.arc(canvas.width - 40, canvas.height/2, 34, Math.PI/2, Math.PI + (Math.PI * 1) / 2, true);
-    context.stroke();
+    if (!monochrome){
+        context.fillStyle = 'hsl('+ 10 +','+ 55 +'%,'+ 53 +'%)';
+        context.fillRect(40+likertWidth, 0, 2, canvas.height);
+        context.fillStyle = 'hsl('+ 30 +','+ 55 +'%,'+ 53 +'%)';
+        context.fillRect(40+(2*likertWidth), 0, 2, canvas.height);
+        context.fillStyle = 'hsl('+ 80 +','+ 55 +'%,'+ 53 +'%)';
+        context.fillRect(canvas.width-40-likertWidth, 0, 2, canvas.height);
+        context.fillStyle = 'hsl('+ 60 +','+ 55 +'%,'+ 53 +'%)';
+        context.fillRect(canvas.width-40-(2*likertWidth), 0, 2, canvas.height);
+
+        context.fillStyle = 'hsl('+ 50 +','+ 0 +'%,'+ 50 +'%)';
+        context.fillRect(canvas.width/2-1, 0, 2, canvas.height);
+
+        context.fillStyle = 'hsl('+ 0 +','+ 85 +'%,'+ 53 +'%)';
+        context.fillRect(40, 0, 2, canvas.height);
+
+        context.fillStyle = 'hsl('+ 100 +','+ 85 +'%,'+ 53 +'%)';
+        context.fillRect(canvas.width - 40, 0, 2, canvas.height);
+    } else {
+        context.fillStyle = '#86a3c6';
+        context.fillRect(40+likertWidth, 0, 2, canvas.height);
+        context.fillRect(40+(2*likertWidth), 0, 2, canvas.height);
+        context.fillRect(canvas.width-40-likertWidth, 0, 2, canvas.height);
+        context.fillRect(canvas.width-40-(2*likertWidth), 0, 2, canvas.height);
+        context.fillRect(canvas.width/2-1, 0, 2, canvas.height);
+        context.fillRect(40, 0, 2, canvas.height);
+        context.fillRect(canvas.width - 40, 0, 2, canvas.height);
+    }
+
+
+    // context.fillStyle = context.strokeStyle = 'hsl('+ 50 +','+ 0 +'%,'+ 50 +'%)';
+    // context.fillRect(canvas.width/2-1, 0, 2, canvas.height/2-34);
+    // context.fillRect(canvas.width/2-1, canvas.height/2+34, 2, canvas.height/2-34);
+    // context.arc(canvas.width/2, canvas.height/2, 34, 0, 2 * Math.PI, false);
+    // context.stroke();
+
+    // context.beginPath();
+    // context.strokeStyle = 'hsl('+ 0 +','+ 85 +'%,'+ 53 +'%)';
+    // context.arc(40, canvas.height/2, 34, Math.PI/2, Math.PI + (Math.PI * 1) / 2, false);
+    // context.stroke();
+    // context.beginPath();
+    // context.strokeStyle = 'hsl('+ 100 +','+ 85 +'%,'+ 53 +'%)';
+    // context.arc(canvas.width - 40, canvas.height/2, 34, Math.PI/2, Math.PI + (Math.PI * 1) / 2, true);
+    // context.stroke();
+    last_click = false;
 }
 
 // Animation loop for the canvas element when running Binary labelling with memory
@@ -617,10 +779,10 @@ function animateBinary(){
     // Output for the video length bar
     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
     // If video passed 25% of viewing time, register it as seen
-    if(getCurrentTime()/getDuration() > 0.25 && seen_trigger == false) {
+    if(getCurrentTime()/getDuration() > tolerance && seen_trigger == false) {
         seen_trigger = true;
         var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+        if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
             seen = video;
         } else {
             seen = "https://www.youtube.com/watch?v="+video;
@@ -643,12 +805,17 @@ function animateBinary(){
     context.lineCap="round";
     context.lineWidth = 4;
     for (var j = 1; j < trace.length; j ++) {
-        if (trace[j].y == 40) {
-            context.strokeStyle = '#82ba84';
-            context.fillStyle = '#a6eda8';
+        if (!monochrome){
+	        if (trace[j].y == 40) {
+	            context.strokeStyle = '#82ba84';
+	            context.fillStyle = '#a6eda8';
+	        } else {
+	            context.strokeStyle = '#bd5a57';
+	            context.fillStyle = '#f0736e';
+	        }
         } else {
-            context.strokeStyle = '#bd5a57';
-            context.fillStyle = '#f0736e';
+            context.strokeStyle = '#6388b6';
+            context.fillStyle = '#86a3c6';
         }
         context.beginPath();
         context.arc(((trace[j].x / currentTime) * (canvas.width - 40)) + 20, trace[j].y,//canvas.height/2,
@@ -661,14 +828,14 @@ function animateBinary(){
 /*###############################################################################
 #                               Helper functions                                #
 ###############################################################################*/
-// Records an annotation 
+// Records an annotation
 // Requires 'currentTime'
 // Mode can be:
 // 'binary': 1 positive -1 negative annotation
 // 'bounded': between -100 and 100, where 0 is the middle
 // 'unbounded' (default): between -inf and +inf, where 0 is the initial value
 function recordAnnotation(currentTime, mode){
-    if ((currentTime > previousTime) && previousValue != annotatorValue) {
+    if ((currentTime > previousTime) && (previousValue != annotatorValue) || (last_click && mode == 'bounded')) {
         if(mode == 'binary'){
             if (annotatorValue > previousValue) {
                 trace.push({x: currentTime, y: 40});
@@ -689,7 +856,12 @@ function recordAnnotation(currentTime, mode){
 
 // Posts a package to the server
 function sendAnnotation(epoch ,timestamp, value){
-    if (test_mode != 1) {
+    if (!test_mode) {
+        let video_name = name + " - " + getDuration();
+        if (video_type == 'youtube' || video_type == 'user_youtube') {
+            video_name = player.getVideoData().title + " (" + name + ")" + " - " + getDuration();
+        }
+
         $.post(
             "util/logger.php",
             {
@@ -699,7 +871,7 @@ function sendAnnotation(epoch ,timestamp, value){
                 project_id: project_id,
                 entry_id: entry_id,
                 session_id: session_id,
-                original_name: name,
+                original_name: video_name,
                 annotation_type: annotation_type
             });
     } else {
@@ -801,7 +973,7 @@ function startPause() {
             if (video_type == 'youtube' || video_type == 'user_youtube') {
                 player.playVideo();
             }
-            video_container.play(); 
+            video_container.play();
 
             paused = false;
             $('#pause').addClass('hidden');
@@ -810,8 +982,6 @@ function startPause() {
                 animateBinary();
             } else if (annotation_type == "gtrace") {
                 animateGtrace();
-            } else if (annotation_type == "ranktrace2") {
-                animateRankTraceNew();
             } else {
                 animateRankTrace();
             }
@@ -819,7 +989,7 @@ function startPause() {
             if (video_type == 'youtube' || video_type == 'user_youtube') {
                 player.pauseVideo();
             } else {
-                video_container.pause();    
+                video_container.pause();
             }
             paused = true;
             $('#pause').removeClass('hidden');
@@ -882,21 +1052,21 @@ $(window).on('wheel', function(event){
 
 function getCurrentTime(){
     var curr_time;
-    if(video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+    if(video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
         curr_time = video_container.currentTime;
     } else if(video_type == 'youtube' || video_type == 'user_youtube') {
         curr_time = player.getCurrentTime();
-    } 
+    }
     return curr_time;
 }
 
 function getDuration(){
     var dur;
-    if(video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+    if(video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
         dur = video_container.duration;
     } else if(video_type == 'youtube' || video_type == 'user_youtube') {
         dur = player.getDuration();
-    } 
+    }
     return dur;
 }
 
@@ -904,44 +1074,130 @@ function hsl2rgb(h,s,l) {
     s = s/100;
     l = l/100;
     let a=s*Math.min(l,1-l);
-    let f= (n,k=(n+h/30)%12) => l - a*Math.max(Math.min(k-3,9-k,1),-1);                 
+    let f= (n,k=(n+h/30)%12) => l - a*Math.max(Math.min(k-3,9-k,1),-1);
     return [f(0)*255,f(8)*255,f(4)*255];
 }
 
+var mouseX = null;
+var mouseY = null;
 
-function gradient(a, b) {
-    return (b.y-a.y)/(b.x-a.x);
+document.addEventListener('mousemove', onMouseUpdate, false);
+document.addEventListener('mouseenter', onMouseUpdate, false);
+document.addEventListener('mousedown', onMouseClickUpdate, false);
+
+function onMouseUpdate(e) {
+    mouseX = e.pageX;
+    mouseY = e.pageY;
 }
 
-function bzCurve(ctx, points, f, t) {
-    //f = 0, will be straight line
-    //t suppose to be 1, but changing the value can control the smoothness too
-    if (typeof(f) == 'undefined') f = 0.3;
-    if (typeof(t) == 'undefined') t = 0.6;
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-
-    var m = 0;
-    var dx1 = 0;
-    var dy1 = 0;
-
-    var preP = points[0];
-    for (var i = 1; i < points.length; i++) {
-        var curP = points[i];
-        nexP = points[i + 1];
-        if (nexP) {
-            m = gradient(preP, nexP);
-            dx2 = (nexP.x - curP.x) * -f;
-            dy2 = dx2 * m * t;
-        } else {
-            dx2 = 0;
-            dy2 = 0;
-        }
-        ctx.bezierCurveTo(preP.x - dx1, preP.y - dy1, curP.x + dx2, curP.y + dy2, curP.x, curP.y);
-        dx1 = dx2;
-        dy1 = dy2;
-        preP = curP;
-    }
-    ctx.stroke();
+function onMouseClickUpdate(e) {
+    onMouseUpdate(e);
+    last_click = true;
 }
+
+
+
+// function gradient(a, b) {
+//     return (b.y-a.y)/(b.x-a.x);
+// }
+
+// function bzCurve(ctx, points, f, t) {
+//     //f = 0, will be straight line
+//     //t suppose to be 1, but changing the value can control the smoothness too
+//     if (typeof(f) == 'undefined') f = 0.3;
+//     if (typeof(t) == 'undefined') t = 0.6;
+
+//     ctx.beginPath();
+//     ctx.moveTo(points[0].x, points[0].y);
+
+//     var m = 0;
+//     var dx1 = 0;
+//     var dy1 = 0;
+
+//     var preP = points[0];
+//     for (var i = 1; i < points.length; i++) {
+//         var curP = points[i];
+//         nexP = points[i + 1];
+//         if (nexP) {
+//             m = gradient(preP, nexP);
+//             dx2 = (nexP.x - curP.x) * -f;
+//             dy2 = dx2 * m * t;
+//         } else {
+//             dx2 = 0;
+//             dy2 = 0;
+//         }
+//         ctx.bezierCurveTo(preP.x - dx1, preP.y - dy1, curP.x + dx2, curP.y + dy2, curP.x, curP.y);
+//         dx1 = dx2;
+//         dy1 = dy2;
+//         preP = curP;
+//     }
+//     ctx.stroke();
+// }
+
+
+// function animateRankTrace(){
+//     if (paused) {
+//         //Draw pause symbol and exit loop if the video is paused
+//         context.fillStyle = "#b1b1b3";
+//         context.fillRect(canvas.width - 20, 10, 8, 20);
+//         context.fillRect(canvas.width - 33, 10, 8, 20);
+//         return;
+//     }
+//     // Output for the video length bar
+//     $('#video-length #bar').css('width', (getCurrentTime()/getDuration())*100 + '%');
+//     // If video passed 99% of viewing time, register it as seen
+//     if(getCurrentTime()/getDuration() > 0.99 && seen_trigger == false) {
+//         seen_trigger = true;
+//         var seen;
+//         if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
+//             seen = video;
+//         } else {
+//             seen = "https://www.youtube.com/watch?v="+video;
+//         }
+//         $.post("util/reg_seen.php", {project_id: project_id, entry_id: entry_id});
+//         console.log("Video registered as 'seen'.");
+//     }
+//     // Automatically send new annotations values every ms while the animation loop is running
+//     currentTime = Math.round(getCurrentTime() * 1000); // Current time of the video in ms
+//     recordAnnotation(currentTime, 'unbounded');
+
+//     // Request new frame, clear canvas, and redraw background
+//     requestAnimationFrame(animateRankTrace);
+//     context.clearRect(0, 0, canvas.width, canvas.height);
+//     context.fillStyle = '#4d4d4d';
+//     context.fillRect(0, 0, canvas.width, canvas.height);
+
+//     // Calculate the normalised values for the annotaton trace for the current tick
+//     trace.push(annotatorValue);
+//     for (var j = 0; j < trace.length; j ++) {
+//         normTrace.push({
+//             x: normPosX(trace, j),
+//             y: normPosY(trace[j], annotatorMax, annotatorMin)
+//         });
+//     }
+
+//     // Sytle setup
+//     context.lineCap="round";
+//     context.strokeStyle = '#86a3c6';
+//     context.lineWidth = 4;
+//     context.beginPath();
+//     // Move to start position
+//     context.moveTo(normTrace[0].x, normTrace[0].y);
+//     // For every point, calculate the control point and draw quadratic curve
+//     for (var i = 1; i < normTrace.length - 2; i ++) {
+//         var xc = (normTrace[i].x + normTrace[i + 1].x) / 2;
+//         var yc = (normTrace[i].y + normTrace[i + 1].y) / 2;
+
+//         context.quadraticCurveTo(normTrace[i].x, normTrace[i].y, xc, yc);
+//     }
+//     // Curve to the last two segments
+//     if (i > 2) {
+//         context.quadraticCurveTo(normTrace[i].x, normTrace[i].y, normTrace[i+1].x, normTrace[i+1].y);
+//         context.stroke();
+//         // Annotation cursor
+//         context.beginPath();
+//         context.arc(normTrace[i+1].x, normTrace[i+1].y, 10, 0, 2 * Math.PI, false);
+//         context.stroke();
+//     }
+//     normTrace = [];
+// }
