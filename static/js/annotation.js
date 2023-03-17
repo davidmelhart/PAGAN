@@ -102,7 +102,7 @@ function loadVideo(
     gtrace_update = _gtrace_update == "on" ? true : false;
     tolerance = parseInt(_tolerance)/100;
     gtrace_rate = parseInt(_gtrace_rate);
-    aspect_ratio = _aspect_ratio;
+    aspect_ratio = _aspect_ratio == "" ? "16:9" : _aspect_ratio;
 
     // Set aspect ratio of video container
     if (aspect_ratio.includes(':')){
