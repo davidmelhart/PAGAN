@@ -12,10 +12,16 @@ $('[name="source_type"]').on('click', function(){
 	if(selected == 'youtube'){
 		youtubeSource.removeClass('hidden');
 		fileSource.addClass('hidden');
+		$('.youtube-source').attr('placeholder', 'One entry per row.');
 	}
 	if(selected == 'upload'){
 		fileSource.removeClass('hidden');
 		youtubeSource.addClass('hidden');
+	}
+	if(selected == 'ftp'){
+		fileSource.addClass('hidden');
+		youtubeSource.removeClass('hidden');
+		$('.youtube-source').attr('placeholder', 'Provide original name for each entry. One entry per row.');
 	}
 	if(selected == 'user_upload' || selected == 'user_youtube'){
 		fileSource.addClass('hidden');
@@ -183,4 +189,26 @@ $('[name="gtrace_rate"]').on('input', function() {
 		displayValue = displayValue + "ms";
 	}
 	$('#gtrace_rate-value').html("Update graph at a <b>" + displayValue + "</b> interval.");
+});
+
+var n_entry = 0;
+$(document).on("change paste keyup cut", function() {
+	setTimeout(function function_name(argument) {
+		if (selected == "youtube" || selected == "ftp"){
+			let entries = $('.youtube-source')[0].value.split("\n");
+			entries = entries.filter( (element) => element.length > 0);
+			n_entry = entries.length;
+			$('[name="n_of_participant_runs"]').attr('max', n_entry);
+			$('#entry-n').html(n_entry);
+		} else if(selected == 'upload'){
+			n_entry = $('#file-source')[0]['files'].length;
+			$('[name="n_of_participant_runs"]').attr('max', n_entry);
+			$('#entry-n').html(n_entry);
+		}
+
+		if (parseInt($('[name="n_of_participant_runs"]').attr('max')) <= parseInt($('[name="n_of_participant_runs"]').val())){
+			$('[name="n_of_participant_runs"]').val($('[name="n_of_participant_runs"]').attr('max'));
+			$('#n_run-value').html($('[name="n_of_participant_runs"]').attr('max'));
+		}
+	}, 100);
 });

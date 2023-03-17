@@ -95,13 +95,13 @@ function loadVideo(
     sound = _sound;
     test_mode = _test_mode == "1" ? true : false;
     monochrome = _monochrome == "on" ? true : false;
-    ranktrace_rate = Math.ceil(parseFloat(_ranktrace_rate));
+    ranktrace_rate = _ranktrace_rate == "" ? 15 : Math.ceil(parseFloat(_ranktrace_rate));
     ranktrace_smooth = _ranktrace_smooth == "on" ? true : false;
     gtrace_control = _gtrace_control == "" ? "keyboard" : gtrace_control;
     gtrace_click = _gtrace_click == "on" ? true : false;
     gtrace_update = _gtrace_update == "on" ? true : false;
-    tolerance = parseInt(_tolerance)/100;
-    gtrace_rate = parseInt(_gtrace_rate);
+    tolerance = _tolerance == "" ? 0.5 : parseInt(_tolerance)/100;
+    gtrace_rate = _gtrace_rate == "" ? 1000 : parseInt(_gtrace_rate);
     aspect_ratio = _aspect_ratio == "" ? "16:9" : _aspect_ratio;
 
     // Set aspect ratio of video container
@@ -118,7 +118,7 @@ function loadVideo(
     }
 
     // Load video if the source is file upload
-    if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+    if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
         console.log("Loading...")
         var source = document.createElement('source');
         source.setAttribute('src', video);
@@ -185,6 +185,7 @@ function onPlayerReady(event) {
             }, 1000);
         }
     }, 5000);
+
     player.addEventListener("onStateChange", function(){
         if(player.getPlayerState() == 1 && firstStart) {
             player.pauseVideo();
@@ -239,7 +240,8 @@ function initEndSession(){
         if(seen_trigger == false) {
             seen_trigger = true;
             var seen;
-            if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+
+            if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
                 seen = video;
             } else {
                 seen = "https://www.youtube.com/watch?v="+video;
@@ -410,7 +412,7 @@ function animateRankTrace(){
     if(getCurrentTime()/getDuration() > tolerance && seen_trigger == false) {
         seen_trigger = true;
         var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+        if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
             seen = video;
         } else {
             seen = "https://www.youtube.com/watch?v="+video;
@@ -628,7 +630,7 @@ function animateGtrace(){
     if(getCurrentTime()/getDuration() > tolerance && seen_trigger == false) {
         seen_trigger = true;
         var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+        if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
             seen = video;
         } else {
             seen = "https://www.youtube.com/watch?v="+video;
@@ -806,7 +808,7 @@ function animateBinary(){
     if(getCurrentTime()/getDuration() > tolerance && seen_trigger == false) {
         seen_trigger = true;
         var seen;
-        if (video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+        if (video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
             seen = video;
         } else {
             seen = "https://www.youtube.com/watch?v="+video;
@@ -859,7 +861,7 @@ function animateBinary(){
 // 'bounded': between -100 and 100, where 0 is the middle
 // 'unbounded' (default): between -inf and +inf, where 0 is the initial value
 function recordAnnotation(currentTime, mode){
-    if ((currentTime > previousTime) && ((previousValue != annotatorValue) || last_click)) {
+    if ((currentTime > previousTime) && (previousValue != annotatorValue) || (last_click && mode == 'bounded')) {
         if(mode == 'binary'){
             if (annotatorValue > previousValue) {
                 trace.push({x: currentTime, y: 40});
@@ -1078,7 +1080,7 @@ $(window).on('wheel', function(event){
 
 function getCurrentTime(){
     var curr_time;
-    if(video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+    if(video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
         curr_time = video_container.currentTime;
     } else if(video_type == 'youtube' || video_type == 'user_youtube') {
         curr_time = player.getCurrentTime();
@@ -1088,7 +1090,7 @@ function getCurrentTime(){
 
 function getDuration(){
     var dur;
-    if(video_type == 'upload' || video_type == 'user_upload' || video_type == 'game') {
+    if(video_type == 'upload' || video_type == 'ftp' || video_type == 'user_upload' || video_type == 'game') {
         dur = video_container.duration;
     } else if(video_type == 'youtube' || video_type == 'user_youtube') {
         dur = player.getDuration();

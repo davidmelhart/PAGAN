@@ -31,14 +31,16 @@ $participant_id = $_COOKIE['user'];
 $past_sessions = array();
 
 if($_SERVER["REQUEST_METHOD"] == "GET"){
-    $sql = "SELECT end_message, survey_link, autofill_id FROM projects WHERE project_id = :project_id LIMIT 1";
+    $sql = "SELECT end_message, survey_label, survey_link, autofill_id, autofill_key FROM projects WHERE project_id = :project_id LIMIT 1";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(":project_id", $project_id, PDO::PARAM_STR);
     $stmt->execute();
     $project = $stmt->fetch(PDO::FETCH_ASSOC);
     $message = $project['end_message'];
+    $label = (!empty($project['survey_label']) ? $project['survey_label'] : 'go to survey');
     $survey = $project['survey_link'];
     $autofill_id = $project['autofill_id'];
+    $autofill_key = $project['autofill_key'];
     // Close statement
     unset($stmt);
 
@@ -65,23 +67,33 @@ echo '<div class="participant_id">ID: '.$_COOKIE['user'].'<br>PAST SESSIONS:<br>
         <div>
             <p>Thank you for participating in this experiment!</p>
             <?php
+                $unique_key = getGUID();
 
                 if (!empty($message)){
                     echo '<p>'.$message.'</p>';
                 }
+
                 if (!empty($survey)){
-                    if (!empty($autofill_id)){
+                    $button = '<a class="button" href="'.$survey;
+
+                    if (!empty($autofill_id) || !empty($autofill_key)) {
                         $separator = '?';
-                        $survey_parts = explode('/', $survey);
-                        if (strpos(end($survey_parts), '?') !== false) {
+                        $survey_arr = explode('/', $survey);
+                        if (strpos(end($survey_arr), '?') !== false) {
                             $separator = '&';
                         }
-
-                        echo '<a class="button" href="'.$survey.$separator.'entry.'.$autofill_id.'='.$participant_id.'">go to survey</a>';
-                    } else {
-                        echo '<a class="button" href="'.$survey.'">go to survey</a>';
+                        if (!empty($autofill_id)){
+                            $button = $button.$separator.'entry.'.$autofill_id.'='.$participant_id;
+                            if (!empty($autofill_key)){
+                                $button = $button.'&entry.'.$autofill_key.'='.$unique_key;
+                            }
+                        } else {
+                            $button = $button.$separator.'entry.'.$autofill_key.'='.$unique_key;
+                        }
                     }
 
+                    $button = $button.'">'.$label.'</a>';
+                    echo $button;
                 }
 
             ?>

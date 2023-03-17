@@ -17,7 +17,7 @@ function getGUID(){
   $uuid = substr($charid, 0, 8).$hyphen
         .substr($charid, 8, 4).$hyphen
         .substr($charid,12, 4).$hyphen
-          .substr($charid,16, 4).$hyphen
+        .substr($charid,16, 4).$hyphen
         .substr($charid,20,12);
   return $uuid;
 }
@@ -32,7 +32,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] !== true){
 }
 
 // Define variables and initialize with empty values
-$project_name = $target = $type = $aspect_ratio = $source_type = $video_loading = $endless = $n_of_entries = $n_of_participant_runs = $n_of_participant_uploads = $sound = $upload_message = $start_message = $end_message = $survey_link = $autofill_id = $monochrome = $ranktrace_rate = $ranktrace_smooth = $gtrace_control = $gtrace_update = $gtrace_click = $gtrace_rate = $tolerance = "";
+$project_name = $target = $type = $aspect_ratio = $source_type = $video_loading = $endless = $n_of_entries = $n_of_participant_runs = $n_of_participant_uploads = $sound = $upload_message = $start_message = $end_message = $survey_link = $survey_label = $autofill_key = $autofill_id = $monochrome = $ranktrace_rate = $ranktrace_smooth = $gtrace_control = $gtrace_update = $gtrace_click = $gtrace_rate = $tolerance = "";
 $project_name_err = $target_err = $source_url_err = "";
 
 // Grab username
@@ -43,6 +43,13 @@ $file_path = "";
 $upload_dir = "user_uploads/";
 
 define('MB', 1048576);
+
+if($_SERVER["REQUEST_METHOD"] == "GET"){
+    $access = "default";
+    if (isset($_SESSION["access"])){
+        $access = $_SESSION["access"];
+    }
+}
 
 // Processing form data when form is submitted
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -377,7 +384,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     unset($stmt);
 
     // Validate source_url
-    if(count($_POST["source_url"]) == 1 && $source_type == "youtube"){
+    $source_urls = explode("\n", $_POST["source_url"]);
+    if($source_urls == 1 && $source_type == "youtube"){
         $source_url_err = "Please enter at least one url to your video.";
     }
     if($file_check == 0 && $source_type == "upload"){
@@ -445,8 +453,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         // Set parameters
         if ($source_type == "upload"){
             $param_n_of_entries = count($_FILES["file"]['name']);
-        } elseif ($source_type == "youtube") {
-            $param_n_of_entries = count($_POST["source_url"]) - 1;
+        } elseif ($source_type == "youtube" || $source_type == "ftp") {
+            $source_urls = explode("\n", $_POST["source_url"]);
+            $param_n_of_entries = count(source_urls);
         } elseif ($source_type == "user_upload" || $source_type == "user_youtube") {
             $param_n_of_entries = htmlspecialchars(trim($_POST['n_of_participant_uploads']));
         }
@@ -467,7 +476,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             if ($source_type == "upload"){
                 $n_of_entries = count($_FILES["file"]['name']);
             } elseif ($source_type == "youtube") {
-                $n_of_entries = count($_POST["source_url"]) - 1;
+                $source_urls = explode("\n", $_POST["source_url"]);
+                $n_of_entries = count($source_urls);
             } else {
                 $n_of_entries = 0;
             }
@@ -584,6 +594,27 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Close statement
     unset($stmt);
 
+    // Get survey label
+    // Prepare a select statement
+    $sql = "SELECT id FROM projects WHERE survey_label = :survey_label";
+
+    if($stmt = $pdo->prepare($sql)){
+        // Bind variables to the prepared statement as parameters
+        $stmt->bindParam(":survey_label", $param_survey_label, PDO::PARAM_STR);
+
+        // Set parameters
+        $param_survey_label = htmlspecialchars(trim($_POST["survey-label"]));
+
+        // Attempt to execute the prepared statement
+        if($stmt->execute()){
+            $survey_label = htmlspecialchars(trim($_POST["survey-label"]));
+        } else{
+            echo "Oops! Something went wrong. Please try again later.";
+        }
+    }
+    // Close statement
+    unset($stmt);
+
     // Get survey link
     // Prepare a select statement
     $sql = "SELECT id FROM projects WHERE survey_link = :survey_link";
@@ -626,12 +657,33 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Close statement
     unset($stmt);
 
+    // Get autofill key
+    // Prepare a select statement
+    $sql = "SELECT id FROM projects WHERE autofill_key = :autofill_key";
+
+    if($stmt = $pdo->prepare($sql)){
+        // Bind variables to the prepared statement as parameters
+        $stmt->bindParam(":autofill_key", $param_autofill_key, PDO::PARAM_STR);
+
+        // Set parameters
+        $param_autofill_key = htmlspecialchars(trim($_POST["autofill-key"]));
+
+        // Attempt to execute the prepared statement
+        if($stmt->execute()){
+            $autofill_key = htmlspecialchars(trim($_POST["autofill-key"]));
+        } else{
+            echo "Oops! Something went wrong. Please try again later.";
+        }
+    }
+    // Close statement
+    unset($stmt);
+
     // Check input errors before inserting in database
     if(empty($project_name_err) && empty($target_err) && empty($source_url_err)){
 
         // Prepare an insert statement
         $sql = "INSERT INTO projects (username, project_id, project_name, target, type, aspect_ratio, source_type, video_loading, endless, n_of_entries, n_of_participant_runs, sound, upload_message, start_message, end_message, survey_link, autofill_id, archived, monochrome, ranktrace_smooth, ranktrace_rate, gtrace_control,  gtrace_update, gtrace_click, gtrace_rate, tolerance)
-        VALUES (:username, :project_id, :project_name, :target, :type, :aspect_ratio, :source_type, :video_loading, :endless, :n_of_entries, :n_of_participant_runs, :sound, :upload_message, :start_message, :end_message, :survey_link, :autofill_id, :archived, :monochrome, :ranktrace_smooth, :ranktrace_rate, :gtrace_control, :gtrace_update, :gtrace_click, :gtrace_rate, :tolerance)";
+        VALUES (:username, :project_id, :project_name, :target, :type, :aspect_ratio, :source_type, :video_loading, :endless, :n_of_entries, :n_of_participant_runs, :sound, :upload_message, :start_message, :end_message, :survey_label, :survey_link, :autofill_id, :autofill_key, :archived, :monochrome, :ranktrace_smooth, :ranktrace_rate, :gtrace_control, :gtrace_update, :gtrace_click, :gtrace_rate, :tolerance)";
 
         if($stmt = $pdo->prepare($sql)){
             // Bind variables to the prepared statement as parameters
@@ -650,8 +702,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $stmt->bindParam(":upload_message", $param_upload_message, PDO::PARAM_STR);
             $stmt->bindParam(":start_message", $param_start_message, PDO::PARAM_STR);
             $stmt->bindParam(":end_message", $param_end_message, PDO::PARAM_STR);
+            $stmt->bindParam(":survey_label", $param_survey_label, PDO::PARAM_STR);
             $stmt->bindParam(":survey_link", $param_survey_link, PDO::PARAM_STR);
             $stmt->bindParam(":autofill_id", $param_autofill_id, PDO::PARAM_STR);
+            $stmt->bindParam(":autofill_key", $param_autofill_key, PDO::PARAM_STR);
             $stmt->bindParam(":archived", $param_archived, PDO::PARAM_STR);
 
             $stmt->bindParam(":monochrome", $param_monochrome, PDO::PARAM_STR);
@@ -679,8 +733,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_upload_message = $upload_message;
             $param_start_message = $start_message;
             $param_end_message = $end_message;
+            $param_survey_label = $survey_label;
             $param_survey_link = $survey_link;
             $param_autofill_id = $autofill_id;
+            $param_autofill_key = $autofill_key;
             $param_archived = "false";
 
             $param_monochrome = $monochrome;
@@ -709,8 +765,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $project_entries = [];
         if ($source_type == "upload"){
             $project_entries = $_FILES["file"]['name'];
-        } elseif ($source_type == "youtube") {
-            $project_entries = array_slice($_POST["source_url"], 0, -1);
+        } elseif ($source_type == "youtube" || $source_type == "ftp") {
+            $source_urls = explode("\n", $_POST["source_url"]);
+            $project_entries = $source_urls;
         }
 
         for ($x = 0; $x < count($project_entries); $x++) {
@@ -734,9 +791,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 if ($source_type == "upload"){
                     $param_source_url = $file_path;
                     $param_original_name = explode(".", $file)[0];
-                } elseif ($source_type == "youtube") {
-                    $param_source_url = htmlspecialchars(trim($_POST["source_url"][$x]));
-                    $param_original_name = explode("=", $param_source_url)[1];
+                } elseif ($source_type == "youtube" || $source_type == "ftp") {      
+                    $param_source_url = htmlspecialchars(trim($project_entries[$x]));
+                    if ($source_type == "youtube") {
+                        $param_original_name = explode("=", $param_source_url)[1];
+                    } elseif ($source_type == "ftp") {
+                        $param_original_name = htmlspecialchars(trim($project_entries[$x]));
+                        $exe = explode(".", $param_original_name)[1];
+                        $param_source_url = 'user_uploads/'.$project_id.'-'.$param_entry_id.'.'.$exe;
+                    }
                 }
 
                 // Attempt to execute the prepared statement
@@ -745,9 +808,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     if ($source_type == "upload"){
                         $source_url = $file_path;
                         $original_name = explode(".", $file)[0];
-                    } elseif ($source_type == "youtube") {
-                        $source_url = htmlspecialchars(trim($_POST["source_url"][$x]));
-                        $original_name = explode("=", $source_url)[1];
+                    } elseif ($source_type == "youtube" || $source_type == "ftp") {
+                        $source_url = htmlspecialchars(trim($project_entries[$x]));
+                        if ($source_type == "youtube") {
+                            $original_name = explode("=", $source_url)[1];
+                        } elseif ($source_type == "ftp") {
+                            $original_name = htmlspecialchars(trim($project_entries[$x]));
+                            $exe = explode(".", $original_name)[1];
+                            $source_url = 'user_uploads/'.$project_id.'-'.$entry_id.'.'.$exe;
+                        }
                     }
                 } else{
                     echo "Oops! Something went wrong. Please try again later.";
@@ -860,25 +929,35 @@ include("header.php");
                 </div>
             </div>
             <div class="form-group">
-                <label>Project Source</label>   
-                <div id="aspect-ratio">
-                    <div><span>Video Aspect Ratio</span> <input type="text" name="aspect-ratio" class="form-control" placeholder="e.g. full width, 4:3, 16:9, 21:9, ..." /></div>
-                    <i style="font-size: 0.7em">The default value is "full width".</i>
-                </div>
+                <label>Project Source</label>
                 <span class="help-block"><?php echo $source_url_err; ?></span>
                 <div id="source-select">
                     <input type="radio" name="source_type" value="youtube" checked> <span>YouTube</span>
-                    <input type="radio" name="source_type" value="upload"> <span>Uploaded Videos</span><br>
+
+                    <?php
+                        if ($access == 'admin') {
+                            echo '<input type="radio" name="source_type" value="upload"> <span>Uploaded Videos</span><br>';
+                            echo '<input type="radio" name="source_type" value="ftp"> <span class="project-info">Direct FTP Uploads<span class="project-info-box" >Get database names for FTP upload from "Get Entries" on the Projects page.</span></span><br>';
+                        }
+                    ?>
                     <hr>
                     <input type="radio" name="source_type" value="user_youtube"> <span>Subject Youtube</span>
-                    <input type="radio" name="source_type" value="user_upload"> <span>Subject Upload</span>
+                    <?php
+                        if ($access == 'admin') {
+                            echo '<input type="radio" name="source_type" value="user_upload"> <span>Subject Upload</span>';
+                        }
+                    ?>
                     <!-- <hr> -->
                     <!-- <input type="radio" name="source_type" value="game"> <span>Uploaded Game</span> -->
                 </div>
                 <div class="form-group <?php echo (!empty($source_url_err)) ? 'has-error' : ''; ?>" id="project-entries">
-                    <input type="file" multiple name="file[]" class="form-control hidden" id="file-source"
-                    accept="video/mp4,video/avi,video/webm,video/mpeg,video/mov" value="">
-                    <input type="text" name="source_url[]" class="form-control youtube-source" value="">
+                    <?php
+                        if ($access == 'admin') {
+                            echo '<input type="file" multiple name="file[]" class="form-control hidden" id="file-source" accept="video/mp4,video/avi,video/webm,video/mpeg,video/mov" value="">';
+                        }
+                    ?>
+                    <!-- <input type="text" name="source_url[]" class="form-control youtube-source" value=""> -->
+                    <textarea class="form-control youtube-source" placeholder="One entry per row." rows="5" cols="46" name="source_url" wrap="soft" style="resize:vertical;"></textarea>
                 </div>
             </div>
             <div class="form-group subject-upload hidden" id="upload-message">
@@ -899,7 +978,7 @@ include("header.php");
             <div class="form-group researcher-upload" id="participant-runs">
                 <label>Number of Annotations<br>a Participant Completes</label>
                 <p style="padding-top:5px; margin: 0">Annotates <strong id="n_run-value">0</strong> out of <strong id="entry-n">0</strong> videos.</p>
-                <input type="range" min="0" max="1" value="0" name="n_of_participant_runs" class="form-control">
+                <input type="range" min="1" max="1" value="1" name="n_of_participant_runs" class="form-control">
                 <!-- <input placeholder="play all (default)" type="number" min="1" name="n_of_participant_runs" class="form-control"><span> out of </span><strong id="entry-n">0</strong> -->
                 <br><i style="font-size: 0.7em">Optional for randomized video order.</i>
             </div>
@@ -918,13 +997,21 @@ include("header.php");
                 <label>Optional End-Plate Message</label>
                 <textarea class="form-control" placeholder="An optional short message or instructions displayed to your participants below the automatic thank you message at the end of the annotation (max 200 characters)." rows="5" cols="46" name="end-message" wrap="soft" maxlength="200" style="overflow:hidden; resize:none;"></textarea>
             </div>
+            <div class="form-group" id="survey-label">
+                <label>Optional Button Label</label>
+                <input placeholder="go to survey" type="text" name="survey-label" class="form-control survey-label" value="">
+            </div>
             <div class="form-group" id="survey-link">
-                <label>Optional Google Forms Survey Link</label>
-                <input placeholder="Survey button will not be added if left empty." type="text" name="survey-link" class="form-control survey" value="">
+                <label>Optional Button Link</label>
+                <input placeholder="Button will not be added if left empty." type="text" name="survey-link" class="form-control survey" value="">
             </div>
             <div class="form-group" id="autofill-id">
                 <label>Autofill Participant ID<br>to <span class="project-info">Google Forms<span class="project-info-box" id="google-forms">You can use the Google Form pre-fill entry ids to specify an field for the participant IDs, which are automatically filled in. This option lets you match the completed surveys to the video annotations through an anonymised ID (GUID). For more information see the <a href="https://gsuite.google.com/learning-center/tips/forms/#!/show-tip/pre-fill-form-answers" target="_blank">Google Forms Documentation</a>.</span></span></label>
-                <input placeholder='id number of form entry (e.g. 1234567890)' type="text" name="autofill-id" class="form-control" value="">
+                <input placeholder='ID number of form entry (e.g. 1234567890).' type="text" name="autofill-id" class="form-control" value="">
+            </div>
+            <div class="form-group" id="autofill-key">
+                <label>Add Unique Verification Key<br>to <span class="project-info">Google Forms<span class="project-info-box" id="google-forms">You can use the Google Form pre-fill entry ids to specify an field for a unique key that will be given the user. This option allows you check whether a user has completed the task and the survey. For more information see the <a href="https://gsuite.google.com/learning-center/tips/forms/#!/show-tip/pre-fill-form-answers" target="_blank">Google Forms Documentation</a>.</span></span></label>
+                <input placeholder='ID number of form entry (e.g. 1234567890).' type="text" name="autofill-key" class="form-control" value="">
             </div>
             <div class="form-group" id="submit">
                 <input type="submit" class="button" value="submit">

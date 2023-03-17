@@ -3,7 +3,7 @@
 server with default setting (user 'root' with no password) */
 define('DB_SERVER', 'localhost');
 define('DB_PORT', 3306);
-define('DB_NAME', 'PAGAN');
+define('DB_NAME', 'pagan');
 define('DB_USERNAME', 'pagan_root');
 define('DB_PASSWORD', 'admin');
 

@@ -45,6 +45,15 @@ if($_SERVER["REQUEST_METHOD"] == "GET"){
     $length_stmt->bindParam(":archived", $archived, PDO::PARAM_STR);
     $length_stmt->execute();
 }
+
+$protocol = 'http://';
+if (isset($_SERVER['HTTPS']) &&
+    ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) ||
+    isset($_SERVER['HTTP_X_FORWARDED_PROTO']) &&
+    $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https') {
+  $protocol = 'https://';
+}
+
 include("header.php");
 ?>
     <div id="subheader">
@@ -100,6 +109,7 @@ include("header.php");
                                         <span class="date">'.$row['created_at'].'</span><br>
                                         <span class="participants">'.$participants.' participants</span><br>
                                         <div class="button-box">';
+                                        echo '<span><a class="button download" href="util/fetch_entries.php?project_id='.$row['project_id'].'">get entries</a></span>';
                                         if ($row['source_type'] == 'upload' || $row['source_type'] == 'user_upload' || $row['source_type'] == 'game') {
                                             echo '<span><a class="button download" href="util/fetch_vid.php?project_id='.$row['project_id'].'">download videos</a></span>';
                                         }
@@ -112,7 +122,7 @@ include("header.php");
                                 </div>
                                 <div class="bottom-box">
                                     <div class="link-box">
-                                        <input class="link" value="'.$_SERVER['HTTP_HOST'].pathinfo($_SERVER['PHP_SELF'], PATHINFO_DIRNAME).'/annotation.php?id='.$row['project_id'].'"/>
+                                        <input class="link" value="'.$protocol.$_SERVER['HTTP_HOST'].pathinfo($_SERVER['PHP_SELF'], PATHINFO_DIRNAME).'annotation.php?id='.$row['project_id'].'"/>
                                         <a class="button video" href="./annotation.php?id='.$row['project_id'].'&test_mode=True" target="_blank">test ';
                                         if ($row['source_type'] == 'user_youtube' || $row['source_type'] == 'user_upload') {
                                             echo 'upload';

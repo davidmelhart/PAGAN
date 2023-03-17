@@ -1,4 +1,5 @@
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'admin';
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password
+BY 'admin';
 
 CREATE TABLE `reg_keys` (
     `id` INT(11) NOT NULL AUTO_INCREMENT,
@@ -13,6 +14,7 @@ CREATE TABLE `users` (
     `email` VARCHAR(50),
     `affiliation` VARCHAR(50),
     `password` VARCHAR(255),
+    `access` VARCHAR(7), 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 );
@@ -32,19 +34,20 @@ CREATE TABLE `projects` (
     `project_name` VARCHAR(100),
     `target` VARCHAR(30),
     `type` VARCHAR(10),
-    `aspect_ratio` VARCHAR(12),
     `source_type` VARCHAR(13),
     `video_loading` VARCHAR(8),
     `endless` VARCHAR(3),
     `n_of_entries` INT(10),
     `n_of_participant_runs` INT(10),
     `end_message` VARCHAR(255),
+    `survey_label` VARCHAR(255),    
     `survey_link` VARCHAR(255),
     `sound` VARCHAR(3),
     `start_message` VARCHAR(255),
     `archived` VARCHAR(5),
     `upload_message` VARCHAR(500),
     `autofill_id` VARCHAR(11),
+    `autofill_key` VARCHAR(11),
     `monochrome` VARCHAR(3),
     `ranktrace_smooth` VARCHAR(3),
     `ranktrace_rate` VARCHAR(5),
@@ -53,6 +56,7 @@ CREATE TABLE `projects` (
     `gtrace_click` VARCHAR(3),
     `gtrace_rate` INT(5),
     `tolerance` INT(3),
+    `aspect_ratio` VARCHAR(12),
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 );
