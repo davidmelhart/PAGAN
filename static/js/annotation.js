@@ -36,6 +36,7 @@ var
     gtrace_click = true                 //controls whether gtrace takes mouse-click as an input
     gtrace_update = true                //controls whether gtrace records a continuous stream of values
     gtrace_rate = 1000					//controls the rate of update for the GTrace annotator
+    record = true                       //controls whether the annotation values are recorded
 ;
 
 let RANKTRACE_DEBUG = false;
@@ -420,9 +421,12 @@ function animateRankTrace(){
         $.post("util/reg_seen.php", {project_id: project_id, entry_id: entry_id});
         console.log("Video registered as 'seen'.");
     }
-    // Automatically send new annotations values every ms while the animation loop is running
-    currentTime = Math.round(getCurrentTime() * 1000); // Current time of the video in ms
-    recordAnnotation(currentTime, 'unbounded');
+
+    if (record) {
+        // Automatically send new annotations values every ms while the animation loop is running
+        currentTime = Math.round(getCurrentTime() * 1000); // Current time of the video in ms
+        recordAnnotation(currentTime, 'unbounded');
+    }
 
     // Request new frame, clear canvas, and redraw background
     requestAnimationFrame(animateRankTrace);
@@ -1121,4 +1125,19 @@ function onMouseUpdate(e) {
 function onMouseClickUpdate(e) {
     onMouseUpdate(e);
     last_click = true;
+}
+
+function rankTraceTutorial(){
+    record = false;
+    trace = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    annotatorMax = Math.max(...trace);
+    annotatorMin = Math.min(...trace);
+    annotatorValue = trace[trace.length-1];
+    paused = false;
+    animateRankTrace();
+    paused = true;
+    context.fillStyle = "#b1b1b3";
+    context.fillRect(canvas.width - 34, canvas.height/2+6, 2, 20);
+    context.font = "20px Arial";
+    context.fillText("cursor", canvas.width - 88, canvas.height/2+42);
 }
