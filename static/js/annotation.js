@@ -1,43 +1,41 @@
 // Global variables
-var
-    video_container = $('video')[0],    //video container
-    canvas = $('canvas')[0],            //canvas for the annotator app
-    context = canvas.getContext('2d'),  //context of the drawing board
-    paused = true,                      //boolean tracking if the video is on pause
-    annotatorPosY = canvas.height/2,    //default annotator cursor position Y
-    annotatorPosX = 20,                 //default annotator cursor position X
-    annotatorValue = 0,                 //annotator starting value
-    annotatorMax = 0,                   //annotator max vaule for normalisation
-    annotatorMin = 0,                   //annotator min vaule for normalisation
-    currentTime = 0,                    //current time of the video since the beginning
-    trace = [],                         //container for recoreded annotator values
-    normTrace = [],                     //container for normalised positions for rendering the trace
-    previousTime = -1,                  //helper variable for timed checks
-    previousValue = 0,                  //helper variable for change in value checks
-    sessionStart = 0,                   //helper variable for storing start of the session
-    logDir = 'logs',                    //tells the post method the log directory
-    firstStart = true,                  //helper variable that tells the app the first startup
-    ended = false,                      //helper variable that tells the app the video is started
-    player,                             //variable holding the youtube player
-    aspect_ratio,                       //helper variable that tells the app the aspect ratio of the video
-    seen_trigger = false,               //helper variable that tells the app the video has been registered as seen
-    tolerance = 0.99,                   //controls how much of the annotation has to be completed to be registered as seen
-    keyPress = false,                   //helper variable that tells the app if a key is pressed
-    end_trigger = false,                //helper variable that tells the app if the end section is triggered
-    storedTime = 0,                     //helper variable that stores last checked time for Gtrace
-    storedValue = 0,                    //helper variable that stores last checked value for Gtrace
-    annotationMod = 1,                  //variable controlling the step in values during the annotation
-    mod = 0                             //modulator in the annotationMod exponential function
-    monochrome = false                  //sets the colour of annotation graphs
-    ranktrace_smooth = true             //controls the smoothing of the RankTrace curve
-    ranktrace_rate = 15                 //controls the rate of update of the RankTrace graph (30 is roughly one new point per second at 30 FPS)
-    last_click = false                  //helper variable that tells the app that a mousedown event occured
-    gtrace_control = "mouse"            //controls the input type of gtrace ("keyboard" or "mouse")
-    gtrace_click = true                 //controls whether gtrace takes mouse-click as an input
-    gtrace_update = true                //controls whether gtrace records a continuous stream of values
-    gtrace_rate = 1000					//controls the rate of update for the GTrace annotator
-    record = true                       //controls whether the annotation values are recorded
-;
+let video_container = $('video')[0];    //video container
+let canvas = $('canvas')[0];            //canvas for the annotator app
+let context = canvas.getContext('2d');  //context of the drawing board
+let paused = true;                      //boolean tracking if the video is on pause
+let annotatorPosY = canvas.height/2;    //default annotator cursor position Y
+let annotatorPosX = 20;                 //default annotator cursor position X
+let annotatorValue = 0;                 //annotator starting value
+let annotatorMax = 0;                   //annotator max vaule for normalisation
+let annotatorMin = 0;                   //annotator min vaule for normalisation
+let currentTime = 0;                    //current time of the video since the beginning
+let trace = [];                         //container for recoreded annotator values
+let normTrace = [];                     //container for normalised positions for rendering the trace
+let previousTime = -1;                  //helper variable for timed checks
+let previousValue = 0;                  //helper variable for change in value checks
+let sessionStart = 0;                   //helper variable for storing start of the session
+let logDir = 'logs';                    //tells the post method the log directory
+let firstStart = true;                  //helper variable that tells the app the first startup
+let ended = false;                      //helper variable that tells the app the video is started
+let player;                             //variable holding the youtube player
+let aspect_ratio;                       //helper variable that tells the app the aspect ratio of the video
+let seen_trigger = false;               //helper variable that tells the app the video has been registered as seen
+let tolerance = 0.99;                   //controls how much of the annotation has to be completed to be registered as seen
+let keyPress = false;                   //helper variable that tells the app if a key is pressed
+let end_trigger = false;                //helper variable that tells the app if the end section is triggered
+let storedTime = 0;                     //helper variable that stores last checked time for Gtrace
+let storedValue = 0;                    //helper variable that stores last checked value for Gtrace
+let annotationMod = 1;                  //variable controlling the step in values during the annotation
+let mod = 0;                             //modulator in the annotationMod exponential function
+let monochrome = false;                  //sets the colour of annotation graphs
+let ranktrace_smooth = true;             //controls the smoothing of the RankTrace curve
+let ranktrace_rate = 15;                 //controls the rate of update of the RankTrace graph (30 is roughly one new point per second at 30 FPS)
+let last_click = false;                  //helper variable that tells the app that a mousedown event occured
+let gtrace_control = "keyboard";         //controls the input type of gtrace ("keyboard" or "mouse")
+let gtrace_click = true;                 //controls whether gtrace takes mouse-click as an input
+let gtrace_update = true;                //controls whether gtrace records a continuous stream of values
+let gtrace_rate = 1000;                 //controls the rate of update for the GTrace annotator
+let record = true;                       //controls whether the annotation values are recorded
 
 let RANKTRACE_DEBUG = false;
 
@@ -98,7 +96,7 @@ function loadVideo(
     monochrome = _monochrome == "on" ? true : false;
     ranktrace_rate = _ranktrace_rate == "" ? 15 : Math.ceil(parseFloat(_ranktrace_rate));
     ranktrace_smooth = _ranktrace_smooth == "on" ? true : false;
-    gtrace_control = _gtrace_control == "" ? "keyboard" : gtrace_control;
+    gtrace_control = _gtrace_control == "" ? "keyboard" : _gtrace_control;
     gtrace_click = _gtrace_click == "on" ? true : false;
     gtrace_update = _gtrace_update == "on" ? true : false;
     tolerance = _tolerance == "" ? 0.5 : parseInt(_tolerance)/100;
@@ -179,7 +177,7 @@ function onPlayerReady(event) {
     // Workaround stuck buffering
     let failSafe = setTimeout(function() {
         if (firstStart) {
-            console.warn("Failsafe startup triggered.")
+            console.warn("Failsafe startup triggered.");
             player.playVideo();
             setTimeout(function() {
                 player.playVideo();
@@ -989,6 +987,7 @@ function startPause() {
             // Tutorial plate is set to opacity: 0 to prevent clicking on video (relevant for youtube playback)
             if (firstStart) {
                 firstStart = false;
+                resetAnnotation();
                 $('#tutorial').css('opacity',0);
                 canvas.width = $('#trace').width();
 
@@ -1129,7 +1128,7 @@ function onMouseClickUpdate(e) {
 
 function rankTraceTutorial(){
     record = false;
-    trace = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    trace = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -2, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -2, -2, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ];
     annotatorMax = Math.max(...trace);
     annotatorMin = Math.min(...trace);
     annotatorValue = trace[trace.length-1];
@@ -1140,4 +1139,17 @@ function rankTraceTutorial(){
     context.fillRect(canvas.width - 34, canvas.height/2+6, 2, 20);
     context.font = "20px Arial";
     context.fillText("cursor", canvas.width - 88, canvas.height/2+42);
+}
+
+// $(document).ready(function (){
+//     rankTraceTutorial();
+// });
+
+function resetAnnotation(){
+    record = true;
+    trace = [];
+    annotatorMax = 0;
+    annotatorMin = 0;
+    annotatorValue = 0;
+    sessionStart = 0;
 }

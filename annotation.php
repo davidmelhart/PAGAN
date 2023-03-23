@@ -82,8 +82,8 @@
             $session_id = htmlspecialchars($_GET['session'], ENT_QUOTES, "UTF-8");
         }
         $progress_entry = new stdClass();
-        if ($test_mode > 0) {
-            if(!isset($_GET['source_url'])){
+        if ($test_mode > 0) {            
+            if(!isset($_GET['source'])){
                 $sql = "SELECT * FROM projects WHERE project_id = :project_id LIMIT 1";
                 $stmt = $pdo->prepare($sql);
                 $stmt->bindParam(":project_id", $project_id, PDO::PARAM_STR);
@@ -141,6 +141,19 @@
                 $endless = "on";
                 $n_of_entries = 1;
                 $n_of_participant_runs = 1;
+                if($type=="ranktrace"){
+                    $monochrome = "on";    
+                } else {
+                    $monochrome = "off";
+                }                
+                $ranktrace_smooth = "on";
+                $ranktrace_rate = 15;
+                $gtrace_control = "keyboard";
+                $gtrace_update = "on";
+                $gtrace_click = "on";
+                $tolerance = 0.99;
+                $gtrace_rate = 1000;
+                $aspect_ratio = "16:9";
             }
         } else {
             if (isset($_GET['entry'])){
